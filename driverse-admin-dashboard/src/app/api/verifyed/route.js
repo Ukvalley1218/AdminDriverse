@@ -1,4 +1,4 @@
-// app/api/proxy/kyc/verified/route.js
+
 import { NextResponse } from 'next/server';
 
 export async function GET(req) {
