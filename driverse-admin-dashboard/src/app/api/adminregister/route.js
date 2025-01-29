@@ -32,3 +32,27 @@ export async function POST(req){
 
   }
 }
+
+
+const generateAccessAndRefreshTokens = async (userId) => {
+  try {
+    const user = await Admin.findById(userId);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Generate tokens with explicit expiration
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+
+    // Save refresh token 
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    return { accessToken, refreshToken };
+  } catch (error) {
+    console.error("Error in generateAccessAndRefreshTokens:", error);
+    throw new Error("Error while generating tokens");
+  }
+};

@@ -43,14 +43,25 @@ const Login = () => {
         email,
         password,
       });
-      console.log(res.data.status)
-      if (res.data.status === 200) {
-        signIn("credentials", {
+      console.log(res.status)
+      if (res.status === 200) {
+        if (res.data.userId) {
+          localStorage.setItem('accesstocken', res.data.accessToken);
+          
+         }
+        // Proceed with NextAuth signin
+        const result = await signIn("credentials", {
           email,
           password,
-          callbackUrl: "/admin",
-          redirect: true,
+          redirect: false,
         });
+        console.log(result)
+
+        if (result?.ok) {
+          router.push("/admin");
+        } else {
+          setGeneralError("Login failed. Please try again.");
+        }
       }
     } catch (error) {
       if (error.response) {
@@ -105,9 +116,8 @@ const Login = () => {
                 type="email"
                 autoComplete="email"
                 required
-                className={`appearance-none rounded-md relative block w-full px-3 py-2 border placeholder-gray-500 text-black focus:outline-none focus:ring-black focus:border-black focus:shadow-outline-black sm:text-sm ${
-                  emailError ? "border-red-500" : "border-black"
-                }`}
+                className={`appearance-none rounded-md relative block w-full px-3 py-2 border placeholder-gray-500 text-black focus:outline-none focus:ring-black focus:border-black focus:shadow-outline-black sm:text-sm ${emailError ? "border-red-500" : "border-black"
+                  }`}
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -130,9 +140,8 @@ const Login = () => {
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
-                  className={`appearance-none rounded-md relative block w-full px-3 py-2 border placeholder-gray-500 text-black focus:outline-none focus:ring-black focus:border-black focus:shadow-outline-black sm:text-sm ${
-                    passwordError ? "border-red-500" : "border-black"
-                  }`}
+                  className={`appearance-none rounded-md relative block w-full px-3 py-2 border placeholder-gray-500 text-black focus:outline-none focus:ring-black focus:border-black focus:shadow-outline-black sm:text-sm ${passwordError ? "border-red-500" : "border-black"
+                    }`}
                   placeholder="********"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

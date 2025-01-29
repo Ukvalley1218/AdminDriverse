@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import {
   FaTachometerAlt,
   FaUser,
@@ -26,8 +26,56 @@ const Sidebar = ({ isOpen, onClose }) => {
     }));
   };
 
+  async function checkToken() {
+    try {
+
+      const token = localStorage.getItem('accesstocken'); // Replace with your token retrieval method
+      console.log(token);
+      const response = await fetch('/api/VarifyToken', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}` // Optional but recommended
+        },
+        body: JSON.stringify({ token })
+      });
+
+      const result = await response.json();
+      console.log("result",result)
+
+      if (!response.ok) {
+        console.error('Token validation failed:', result.message);
+         window.location.href = '/login';
+        return false;
+      }
+
+      // Check for explicit validation result
+      if (!result.isValid) {
+        console.warn('Token is not valid');
+        window.location.href = '/login';
+        return false;
+      }
+
+   
+      console.log('Token is valid', result);
+
+      return true;
+
+    } catch (error) {
+      console.error('Validation request failed', error);
+      window.location.href = '/login';
+      return false;
+    }
+  }
+
+  useEffect(() => {
+    checkToken();
+  }, []);
+
+
   const links = [
     { name: "Dashboard", icon: <FaTachometerAlt />, href: "/admin" },
+    
     { name: "Talk to Friend", icon: <FaUser />, href: "/admin/talk-to-friend" },
     {
       name: "Verification",

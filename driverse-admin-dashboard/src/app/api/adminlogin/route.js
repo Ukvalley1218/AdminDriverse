@@ -1,63 +1,97 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
-
+import jwt from "jsonwebtoken";
 import { connectToDb } from "../../lib/db";
 import Admin from "../../lib/AdminModal";
 
 export async function POST(req) {
-  connectToDb();
+  // Ensure the database connection is awaited
+  await connectToDb();
 
   try {
     const body = await req.json();
     const { email, password } = body;
 
+    // Validate input
     if (!email) {
       return NextResponse.json(
-        { status: 400, message: "Email is required." },
+        { message: "email is required." },
         { status: 400 }
       );
     }
 
     if (!password) {
       return NextResponse.json(
-        { status: 400, message: "Password is required." },
+        { message: "Password is required." },
         { status: 400 }
       );
     }
 
+    // Find the user by email
     const user = await Admin.findOne({ email });
 
     if (user) {
-      const checkPassword = bcrypt.compareSync(password, user.password);
+ 
+      const isPasswordCorrect = await bcrypt.compare(password, user.password);
+      console.log(user._id)
+      if (isPasswordCorrect) {
+        const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user._id);
 
-      if (checkPassword) {
         return NextResponse.json(
-          { status: 200, message: "User logged in successfully." },
-          { status: 200 }
+          {
+            message: "Admin logged in successfully.",
+            userId: user._id.toString(),
+            accessToken,
+            refreshToken,
+            redirectUrl: "/admin"
+          },
+          {
+            status: 200,
+            headers: {
+              'Set-Cookie': `refreshToken=${refreshToken}; HttpOnly; Path=/; Max-Age=${24 * 60 * 60}; SameSite=Strict`
+            }
+          }
         );
       } else {
         return NextResponse.json(
-          {
-            status: 400,
-            message: "Incorrect password. Please check your credentials.",
-          },
+          { message: "Incorrect password. Please check your credentials." },
           { status: 400 }
         );
       }
     } else {
       return NextResponse.json(
-        { status: 404, message: "No account found with this email." },
+        { message: "No account found with this email." },
         { status: 404 }
       );
     }
   } catch (error) {
-    console.error(error);
+    console.error("Error during login:", error.message);
     return NextResponse.json(
-      {
-        status: 500,
-        message: "Internal server error. Please try again later.",
-      },
+      { message: "Internal server error. Please try again later." },
       { status: 500 }
     );
   }
 }
+
+const generateAccessAndRefreshTokens = async (userId) => {
+  try {
+    const user = await Admin.findById(userId);
+
+    if (!user) {
+      throw new Error("User not found");
+    }
+
+    // Generate tokens with explicit expiration
+    const accessToken = user.generateAccessToken();
+    const refreshToken = user.generateRefreshToken();
+
+    // Save refresh token 
+    user.refreshToken = refreshToken;
+    await user.save({ validateBeforeSave: false });
+
+    return { accessToken, refreshToken };
+  } catch (error) {
+    console.error("Error in generateAccessAndRefreshTokens:", error);
+    throw new Error("Error while generating tokens");
+  }
+};

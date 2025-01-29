@@ -1,184 +1,122 @@
-"use client"
-import Head from 'next/head';
-import React from 'react'
-import CountUp from 'react-countup';
-import { FaBell, FaEnvelope, FaSearch } from 'react-icons/fa';
-import { FiTrendingDown,FiTrendingUp } from "react-icons/fi";
-import { PiWarningThin } from "react-icons/pi";
+
+ "use client";
+import Head from "next/head";
+import React, { useEffect, useState } from "react";
+import { FaPhoneAlt, FaUser } from "react-icons/fa";
 
 const AdminTalkToFriend = () => {
+  const [callDetails, setCallDetails] = useState([]);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    limit: 10,
+  });
+  const [loading, setLoading] = useState(false);
+
+  const fetchCallDetails = async (page = 1) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/getUserCallDetails?page=${page}&limit=${pagination.limit}`
+      );
+      const data = await response.json();
+
+      if (data.success) {
+        setCallDetails(data.data);
+        setPagination({
+          currentPage: data.pagination.currentPage,
+          totalPages: data.pagination.totalPages,
+          limit: data.pagination.limit,
+        });
+      } else {
+        console.error("Failed to fetch call details:", data.message);
+      }
+    } catch (error) {
+      console.error("Error fetching call details:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCallDetails(pagination.currentPage);
+  }, []);
+
+  const handleNextPage = () => {
+    if (pagination.currentPage < pagination.totalPages) {
+      fetchCallDetails(pagination.currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (pagination.currentPage > 1) {
+      fetchCallDetails(pagination.currentPage - 1);
+    }
+  };
+
   return (
     <>
       <Head>
         <title>Admin Dashboard</title>
       </Head>
-      <div className='container h-full '>
-        {/* Header Section */}
-        <div className='flex flex-col sm:flex-row items-center content-start justify-between mb-4'>
-          {/* Dashboard Title */}
-          <h1 className='hidden sm:block text-xl sm:ml-7 lg:ml-0 sm:text-2xl lg:text-4xl font-bold mb-2 sm:mb-0'>
-            Talk To Friend
-          </h1>
-          
-          <div className='flex flex-row items-center justify-end sm:justify-center gap-y-2 sm:gap-y-0 sm:gap-x-4'>
-            {/* Search Input */}
-            <div className='flex items-center   border border-gray-800 rounded-xl p-2 w-[65%] sm:w-auto'>
-              <FaSearch className='text-gray-500' />
-              <input
-                type='text'
-                placeholder='Search...'
-                className='ml-2 outline-none border-none flex-grow sm:flex-grow-0 w-full'
-              />
-            </div>
-            {/* Icons Section */}
-            <div className='flex items-center gap-x-2 pl-3'>
-              <div className='flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-slate-800'>
-                <FaEnvelope className='text-gray-500' />
+      <div className="container mx-auto p-4">
+        <h1 className="text-2xl font-bold mb-4">Talk to Friend - Call Details</h1>
+
+        {loading ? (
+          <p>Loading...</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {callDetails.map((call, index) => (
+              <div
+                key={index}
+                className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition"
+              >
+                <div className="flex items-center mb-3">
+                  <FaUser className="text-blue-500 mr-3" />
+                  <div>
+                    <p className="text-sm font-medium">
+                      Caller: {call.callerName} ({call.callerServiceType})
+                    </p>
+                    <p className="text-sm font-medium">
+                      Receiver: {call.receiverName} ({call.receiverServiceType})
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center mb-2">
+                  <FaPhoneAlt className="text-green-500 mr-3" />
+                  <p className="text-sm">Status: {call.status}</p>
+                </div>
+                <p className="text-sm font-medium text-gray-700">
+                  Duration: {call.formattedDuration}
+                </p>
               </div>
-              <div className='flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-slate-800'>
-                <FaBell className='text-gray-500' />
-              </div>
-            </div>
+            ))}
           </div>
-        </div>
-        
-          {/* count section Section */}
-          <div className='bg-slate-100 p-4 rounded-lg'>
-          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
-            {/* Users */}
-            <div className='items-center p-4 rounded-2xl bg-white shadow-lg w-full'>
-              <div className='flex items-center justify-between W-full '>
-              <CountUp end={50} duration={1} className='text-base  text-slate-800 font-semibold '/>
-              <FiTrendingUp className='h-10 w-10 text-green-500'/>
+        )}
 
-              </div>
-              <div className=''>
-                <p className='text-slate-500 '>More Than 2 hours Per day</p>
-                <h2 className='text-lg font-bold text-slate-700'>Users</h2>
-                
-              </div>
-            </div>
-
-            {/* Mechanic */}
-            <div className='items-center p-4 rounded-2xl bg-white shadow-lg w-full'>
-              <div className='flex items-center justify-between W-full '>
-              <CountUp end={50} duration={1} className='text-base  text-slate-800 font-semibold '/>
-              <FiTrendingDown className='h-10 w-10 text-red-500'/>
-
-              </div>
-              <div className=''>
-                <p className='text-slate-500 '>Less Than 2 hours Per day</p>
-                <h2 className='text-lg font-bold text-slate-700'>Agent</h2>
-                
-              </div>
-            </div>
-
-            {/* Tow */}
-            <div className='items-center p-4 rounded-2xl bg-white shadow-lg w-full'>
-              <div className='flex items-center justify-between W-full '>
-              <CountUp end={50} duration={1} className='text-base  text-slate-800 font-semibold '/>
-              <FiTrendingUp className='h-10 w-10 text-green-500'/>
-
-              </div>
-              <div className=''>
-                <p className='text-slate-500 '>More Than 2 hours Per day</p>
-                <h2 className='text-lg font-bold text-slate-700'>Users</h2>
-                
-              </div>
-            </div>
-
-          
-            <div className='items-center p-4 rounded-2xl bg-white shadow-lg w-full'>
-              <div className='flex items-center justify-between W-full '>
-              <CountUp end={50} duration={1} className='text-base  text-slate-800 font-semibold '/>
-              <FiTrendingDown className='h-10 w-10 text-red-500'/>
-
-              </div>
-              <div className=''>
-                <p className='text-slate-500 '>Less Than 2 hours Per day</p>
-                <h2 className='text-lg font-bold text-slate-700'>Agent</h2>
-                
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6  '>
-          {/* Recent Premiums Section */}
-          <div className='bg-white p-4 rounded-lg shadow-lg'>
-          <div className="flex items-center gap-x-3">
-          <PiWarningThin size={24} className='text-red-500'/>
-          <h1 className='text-xl font-bold '>Agent Warning</h1>
-          </div>
-            {/* User List */}
-            <div className='border-b border-gray-300 pb-2 mb-2'>
-              <div className='flex justify-between'>
-                <span className='font-bold'>John Deo</span>
-                <span className='text-sm text-gray-500'>5 hour ago</span>
-              </div>
-              <div>Warning description</div>
-            </div>
-            <div className='border-b border-gray-300 pb-2 mb-2'>
-              <div className='flex justify-between'>
-                <span className='font-bold'>Jane Doe</span>
-                <span className='text-sm text-gray-500'>1 day ago</span>
-              </div>
-              <div>Warning description</div>
-            </div>
-            <div className='border-b border-gray-300 pb-2 mb-2'>
-              <div className='flex justify-between'>
-                <span className='font-bold'>Mark Smith</span>
-                <span className='text-sm text-gray-500'>3 day ago</span>
-              </div>
-              <div>Warning description</div>
-            </div>
-            <div className='border-b border-gray-300 pb-2 mb-2'>
-              <div className='flex justify-between'>
-                <span className='font-bold'>Emily Jones</span>
-                <span className='text-sm text-gray-500'>5 day ago</span>
-              </div>
-              <div>Warning description</div>
-            </div>
-          </div>
-          <div className='bg-white p-4 rounded-lg shadow-lg'>
-          <div className="flex items-center gap-x-3">
-          <PiWarningThin size={24} className='text-red-500'/>
-          <h1 className='text-xl font-bold '>Agent Warning</h1>
-          </div>
-            {/* User List */}
-            <div className='border-b border-gray-300 pb-2 mb-2'>
-              <div className='flex justify-between'>
-                <span className='font-bold'>John Deo</span>
-                <span className='text-sm text-gray-500'>5 hour ago</span>
-              </div>
-              <div>Warning description</div>
-            </div>
-            <div className='border-b border-gray-300 pb-2 mb-2'>
-              <div className='flex justify-between'>
-                <span className='font-bold'>Jane Doe</span>
-                <span className='text-sm text-gray-500'>1 day ago</span>
-              </div>
-              <div>Warning description</div>
-            </div>
-            <div className='border-b border-gray-300 pb-2 mb-2'>
-              <div className='flex justify-between'>
-                <span className='font-bold'>Mark Smith</span>
-                <span className='text-sm text-gray-500'>3 day ago</span>
-              </div>
-              <div>Warning description</div>
-            </div>
-            <div className='border-b border-gray-300 pb-2 mb-2'>
-              <div className='flex justify-between'>
-                <span className='font-bold'>Emily Jones</span>
-                <span className='text-sm text-gray-500'>5 day ago</span>
-              </div>
-              <div>Warning description</div>
-            </div>
-          </div>
+        {/* Pagination */}
+        <div className="flex justify-between items-center mt-6">
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300"
+            onClick={handlePreviousPage}
+            disabled={pagination.currentPage === 1}
+          >
+            Previous
+          </button>
+          <p>
+            Page {pagination.currentPage} of {pagination.totalPages}
+          </p>
+          <button
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300"
+            onClick={handleNextPage}
+            disabled={pagination.currentPage === pagination.totalPages}
+          >
+            Next
+          </button>
         </div>
       </div>
     </>
-  )
-}
+  );
+};
 
 export default AdminTalkToFriend;
