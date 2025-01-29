@@ -88,34 +88,34 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: "User", icon: <FaUser />, href: "/admin/user" },
     { name: "Mechanic", icon: <FaTools />, href: "/admin/mechanic" },
     { name: "Tow", icon: <FaTruck />, href: "/admin/tow" },
-    {
-      name: "Company",
-      icon: <FaBuilding />,
-      subLinks: [
-        { name: "Request", href: "/admin/company/request" },
-        { name: "Verified", href: "/admin/company/verified" },
-      ],
-    },
-    {
-      name: "Reports",
-      icon: <FaRegFileAlt />,
-      subLinks: [
-        { name: "User", href: "/admin/reports/user" },
-        { name: "Mechanic", href: "/admin/reports/mechanic" },
-        { name: "Tow", href: "/admin/reports/tow" },
-        { name: "All Premium", href: "/admin/reports/all-premium" },
-      ],
-    },
-    {
-      name: "Subscription",
-      icon: <FaRegFileAlt />,
-      subLinks: [
-        { name: "Cancel", href: "/admin/subscription/cancel" },
-        { name: "Not Renew", href: "/admin/subscription/not-renew" },
-        { name: "Payment Fail", href: "/admin/subscription/payment-fail" },
-      ],
-    },
-    { name: "Settings", icon: <FaCog />, href: "/admin/settings" },
+    // {
+    //   name: "Company",
+    //   icon: <FaBuilding />,
+    //   subLinks: [
+    //     { name: "Request", href: "/admin/company/request" },
+    //     { name: "Verified", href: "/admin/company/verified" },
+    //   ],
+    // },
+    // {
+    //   name: "Reports",
+    //   icon: <FaRegFileAlt />,
+    //   subLinks: [
+    //     { name: "User", href: "/admin/reports/user" },
+    //     { name: "Mechanic", href: "/admin/reports/mechanic" },
+    //     { name: "Tow", href: "/admin/reports/tow" },
+    //     { name: "All Premium", href: "/admin/reports/all-premium" },
+    //   ],
+    // },
+    // {
+    //   name: "Subscription",
+    //   icon: <FaRegFileAlt />,
+    //   subLinks: [
+    //     { name: "Cancel", href: "/admin/subscription/cancel" },
+    //     { name: "Not Renew", href: "/admin/subscription/not-renew" },
+    //     { name: "Payment Fail", href: "/admin/subscription/payment-fail" },
+    //   ],
+    // },
+    // { name: "Settings", icon: <FaCog />, href: "/admin/settings" },
   ];
 
   return (

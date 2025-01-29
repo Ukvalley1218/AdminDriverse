@@ -1,27 +1,42 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, Download, Calendar } from 'lucide-react';
 
 const AdminDashboard = () => {
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [kycData, setKycData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Sample data - replace with your actual data
-  const [data] = useState([
-    { id: 1, name: 'John Doe', status: 'Active', date: '2024-12-20',  },
-    { id: 2, name: 'Jane Smith', status: 'Active', date: '2024-12-21', },
-    { id: 3, name: 'Mike Johnson', status: 'Active', date: '2024-12-22',  },
-    { id: 4, name: 'Sarah Williams', status: 'Active', date: '2024-12-23',  },
-  ]);
+  useEffect(() => {
+    const fetchKYCData = async () => {
+      try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/getAllVerifiedKYC`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch KYC data');
+        }
+        const data = await response.json();
+        setKycData(data);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load KYC data. Please try again later.');
+        console.error('Error fetching KYC data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchKYCData();
+  }, []);
 
   // Filter data based on date range and search query
-  const filteredData = data.filter(item => {
-    const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         item.status.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         item.action.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredData = kycData.filter(item => {
+    const matchesSearch = 
+      (item.username?.toLowerCase().includes(searchQuery.toLowerCase()) || '');
     
-    const itemDate = new Date(item.date);
+    const itemDate = new Date(item.verifiedAt);
     const start = startDate ? new Date(startDate) : null;
     const end = endDate ? new Date(endDate) : null;
     
@@ -31,17 +46,51 @@ const AdminDashboard = () => {
   });
 
   const handleDownload = () => {
-    // Implement your download logic here
-    console.log('Downloading filtered data...');
+    // Create CSV content
+    const csvContent = [
+      ['Username', 'Verified At', 'Verification Status'],
+      ...filteredData.map(item => [
+        item.username,
+        new Date(item.verifiedAt).toLocaleString(),
+        item.isVerified ? 'Verified' : 'Pending'
+      ])
+    ].map(row => row.join(',')).join('\n');
+
+    // Create and trigger download
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'kyc-verification-data.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-xl text-gray-600">Loading verification data...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-xl text-red-600">{error}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl mx-auto">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-6xl mx-auto">
         {/* Header */}
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Verification Dashboard</h1>
             <div className="flex gap-2">
               <span className="bg-black w-10 h-10 rounded-full flex items-center justify-center">
                 <span className="text-white text-xl">✓</span>
@@ -87,7 +136,7 @@ const AdminDashboard = () => {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                    placeholder="Search..."
+                    placeholder="Search by username..."
                   />
                 </div>
               </div>
@@ -108,27 +157,27 @@ const AdminDashboard = () => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-gray-50">
-                  <th className="p-3 text-left font-semibold text-gray-900 border-b">Name</th>
+                  <th className="p-3 text-left font-semibold text-gray-900 border-b">Username</th>
+                  <th className="p-3 text-left font-semibold text-gray-900 border-b">Verified At</th>
                   <th className="p-3 text-left font-semibold text-gray-900 border-b">Status</th>
-                  <th className="p-3 text-left font-semibold text-gray-900 border-b">Date</th>
-                  
                 </tr>
               </thead>
               <tbody>
-                {filteredData.map((item) => (
-                  <tr key={item.id} className="border-b hover:bg-gray-50">
-                    <td className="p-3 text-gray-900">{item.name}</td>
+                {filteredData.map((item, index) => (
+                  <tr key={index} className="border-b hover:bg-gray-50">
+                    <td className="p-3 text-gray-900">{item.username}</td>
+                    <td className="p-3 text-gray-900">
+                      {new Date(item.verifiedAt).toLocaleString()}
+                    </td>
                     <td className="p-3">
                       <span className={`px-2 py-1 rounded-full text-sm ${
-                        item.status === 'Active' ? 'bg-gray-900 text-white' :
-                        item.status === 'Inactive' ? 'bg-gray-200 text-gray-800' :
-                        'bg-gray-100 text-gray-800'
+                        item.isVerified 
+                          ? 'bg-green-100 text-green-800' 
+                          : 'bg-yellow-100 text-yellow-800'
                       }`}>
-                        {item.status}
+                        {item.isVerified ? 'Verified' : 'Pending'}
                       </span>
                     </td>
-                    <td className="p-3 text-gray-900">{item.date}</td>
-                    
                   </tr>
                 ))}
               </tbody>
