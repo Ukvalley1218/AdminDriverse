@@ -17,7 +17,7 @@ const AdminTalkToFriend = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/getUserCallDetails?page=${page}&limit=${pagination.limit}`
+        `/api/talk`
       );
       const data = await response.json();
 

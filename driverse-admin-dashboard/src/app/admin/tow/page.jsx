@@ -28,7 +28,7 @@ const AdminTow = () => {
   const fetchData = async () => {
     try {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/getAllTowPosts`,
+        `/api/Tower`,
         {
           params: {
             page: currentPage,

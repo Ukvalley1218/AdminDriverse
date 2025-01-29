@@ -30,7 +30,7 @@ const AdminUser = () => {
   const fetchData = async () => {
     try {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/getAllUsers`,
+        `/api/user`,
         {
           params: {
             search: searchQuery,
@@ -141,7 +141,7 @@ const AdminUser = () => {
                 <span className="text-gray-500 mr-2 font-bold">Service Type:</span>
                 <span>{user.serviceType}</span>
               </div>
-              <div className="flex justify-evenly gap-2">
+              {/* <div className="flex justify-evenly gap-2">
                 <button className="bg-blue-100 text-blue-500 p-2 rounded-md">
                   <FaEdit />
                 </button>
@@ -151,7 +151,7 @@ const AdminUser = () => {
                 <button className="bg-red-100 text-red-600 p-2 rounded-md">
                   <FaTrash />
                 </button>
-              </div>
+              </div> */}
             </div>
           ))}
         </div>

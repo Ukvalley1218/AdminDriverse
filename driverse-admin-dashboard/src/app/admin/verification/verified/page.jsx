@@ -13,7 +13,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const fetchKYCData = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE_URL}/getAllVerifiedKYC`);
+        const response = await fetch(`/api/verifyed`);
         if (!response.ok) {
           throw new Error('Failed to fetch KYC data');
         }

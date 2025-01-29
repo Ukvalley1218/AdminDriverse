@@ -30,8 +30,7 @@ const AdminMechanic = () => {
   
   const fetchData = async () => {
     try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_BASE_URL}/getAllMechPostServices`,
+      const response = await axios.get(`/api/mech`,
         {
           params: {
             page: currentPage,
@@ -41,7 +40,8 @@ const AdminMechanic = () => {
           },
         }
       );
-      setMechanics(response.data.data); // Adjust according to API response structure
+      setMechanics(response.data.data);
+      // console.log(response.data.data);
       setTotalPages(response.data.totalPages || 1);
     } catch (error) {
       console.error("Error fetching mechanics data:", error);
@@ -145,7 +145,7 @@ const AdminMechanic = () => {
             >
               <div className="flex items-center mb-4">
                 <FiUser className="text-white text-4xl mr-4 bg-slate-900 p-2 rounded-full" />
-                <h2 className="font-bold text-lg">{item.mechanic.username}</h2>
+                <h2 className="font-bold text-lg">{item?.mechanic?.username}</h2>
               </div>
               <div className="flex items-center mb-2">
                 <TbCurrencyDollarCanadian className="text-gray-800 mr-2 h-7 w-7" />

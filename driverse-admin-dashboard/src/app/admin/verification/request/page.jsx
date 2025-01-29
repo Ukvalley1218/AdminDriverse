@@ -11,7 +11,7 @@ const AdminVerificationRequest = () => {
   useEffect(() => {
     const fetchKYCData = async () => {
       try {
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/getAllUserKYC`, {
+        const response = await axios.get(`/api/getkyc`, {
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
           }
@@ -51,7 +51,7 @@ const AdminVerificationRequest = () => {
   const verifyed = async (kycDoc) => {
     try {
       console.log("kycDoc", kycDoc);
-      const response = await axios.put(`${process.env.NEXT_PUBLIC_API_BASE_URL}/verifyKYC/${kycDoc}`);
+      const response = await axios.put(`/api/getkyc/${kycDoc}`);
       console.log('KYC Verification Response:', response.data);
       alert('KYC verified successfully');
     } catch (error) {
