@@ -85,9 +85,10 @@ const Sidebar = ({ isOpen, onClose }) => {
         { name: "Verified", href: "/admin/verification/verified" },
       ],
     },
-    { name: "User", icon: <FaUser />, href: "/admin/user" },
-    { name: "Mechanic", icon: <FaTools />, href: "/admin/mechanic" },
-    { name: "Tow", icon: <FaTruck />, href: "/admin/tow" },
+    { name: "All user", icon: <FaUser />, href: "/admin/user" },
+    { name: "Post mechanic", icon: <FaTools />, href: "/admin/mechanic" },
+    { name: "Post Tow", icon: <FaTruck />, href: "/admin/tow" },
+    { name: "Create TalkTime", icon: <FaTruck />, href: "/admin/talk" },
     // {
     //   name: "Company",
     //   icon: <FaBuilding />,
@@ -96,16 +97,16 @@ const Sidebar = ({ isOpen, onClose }) => {
     //     { name: "Verified", href: "/admin/company/verified" },
     //   ],
     // },
-    // {
-    //   name: "Reports",
-    //   icon: <FaRegFileAlt />,
-    //   subLinks: [
-    //     { name: "User", href: "/admin/reports/user" },
-    //     { name: "Mechanic", href: "/admin/reports/mechanic" },
-    //     { name: "Tow", href: "/admin/reports/tow" },
-    //     { name: "All Premium", href: "/admin/reports/all-premium" },
-    //   ],
-    // },
+    {
+      name: "Reports",
+      icon: <FaRegFileAlt />,
+      subLinks: [
+        { name: "User", href: "/admin/reports/user" },
+        { name: "Mechanic", href: "/admin/reports/mechanic" },
+        { name: "Tow", href: "/admin/reports/tow" },
+        { name: "All Premium", href: "/admin/reports/all-premium" },
+      ],
+    },
     // {
     //   name: "Subscription",
     //   icon: <FaRegFileAlt />,
