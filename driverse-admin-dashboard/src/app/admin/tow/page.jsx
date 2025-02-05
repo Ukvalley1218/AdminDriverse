@@ -10,7 +10,7 @@ import {
   FaTrash,
 } from "react-icons/fa";
 import { LuDownload } from "react-icons/lu";
-import { BiSort } from "react-icons/bi";
+
 import { FiUser } from "react-icons/fi";
 import { TbCurrencyDollarCanadian } from "react-icons/tb";
 import { HiOutlineClock } from "react-icons/hi";
@@ -100,14 +100,7 @@ const AdminTow = () => {
               />
             </div>
             
-            <div className="flex items-center gap-x-2 ml-2">
-              <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-slate-800">
-                <FaEnvelope className="text-gray-500" />
-              </div>
-              <div className="flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full border border-slate-800">
-                <FaBell className="text-gray-500" />
-              </div>
-            </div>
+           
 
             <button className="h-10 w-max bg-black text-white shadow-md flex justify-between items-center rounded-xl p-2 border-2 gap-x-2">
               <LuDownload size={24} />
@@ -118,19 +111,7 @@ const AdminTow = () => {
 
         {/* Range Selector Section */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
-          <div className="w-full flex items-center justify-center gap-x-2 sm:w-auto">
-            <h1 className="text-base font-semibold text-slate-600">Show</h1>
-            {/* <select 
-              className="appearance-none border border-gray-700 rounded-md px-4 w-full sm:w-auto"
-              value={entriesPerPage}
-              onChange={(e) => setEntriesPerPage(Number(e.target.value))}
-            >
-              <option value="10">10</option>
-              <option value="20">20</option>
-              <option value="50">50</option>
-            </select> */}
-            <h1 className="text-base font-semibold text-slate-600">Entries</h1>
-          </div>
+         
 
           <div className="flex items-center gap-2">
             <div className="flex flex-col sm:flex-row items-center gap-2">
@@ -150,10 +131,7 @@ const AdminTow = () => {
             </div>
           </div>
 
-          <button className="flex items-center justify-center sm:justify-start gap-2 border border-gray-700 rounded-md py-2 px-4 w-full sm:w-auto">
-            <BiSort size={20} />
-            <span className="text-base font-semibold text-slate-600">Sort</span>
-          </button>
+          
         </div>
 
         {/* Cards Section */}
@@ -165,7 +143,7 @@ const AdminTow = () => {
             >
               <div className="flex items-center mb-4">
                 <FiUser className="text-white text-4xl mr-4 bg-slate-900 p-2 rounded-full" />
-                <h2 className="font-bold text-lg">{item.Tower.email}</h2>
+                <h2 className="font-bold text-sm">{item.Tower.email}</h2>
               </div>
               <div className="flex items-center mb-2">
                 <TbCurrencyDollarCanadian className="text-gray-800 mr-2 h-7 w-7" />
@@ -179,26 +157,7 @@ const AdminTow = () => {
                   <span>{formatTime(item.endTime)}</span>
                 </div>
               </div>
-              {/* <div className="flex justify-evenly items-center w-full gap-2">
-                <div>
-                  <button className="flex items-center justify-center bg-blue-100 text-blue-500 rounded-md p-2 hover:bg-gray-300">
-                    <FaEdit />
-                  </button>
-                  <h1 className="text-sm text-slate-500 text-center">Edit</h1>
-                </div>
-                <div>
-                  <button className="flex items-center justify-center bg-yellow-100 text-yellow-600 rounded-md p-2 hover:bg-gray-300">
-                    <FaEye />
-                  </button>
-                  <h1 className="text-sm text-slate-500 text-center">View</h1>
-                </div>
-                <div>
-                  <button className="flex items-center justify-center bg-red-100 text-red-600 rounded-md p-2 hover:bg-gray-300">
-                    <FaTrash />
-                  </button>
-                  <h1 className="text-sm text-slate-500 text-center">Delete</h1>
-                </div>
-              </div> */}
+              
             </div>
           ))}
         </div>

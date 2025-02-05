@@ -18,7 +18,7 @@ const AdminDashboard = () => {
   const [totalPages, setTotalPages] = useState(1);
 
 
-  console.log("env Log", `${process.env.NEXT_PUBLIC_API_BASE_URL}`)
+  // console.log("env Log", `${process.env.NEXT_PUBLIC_API_BASE_URL}`)
   // Fetch stats and recent subscriptions
   useEffect(() => {
     const fetchData = async () => {
@@ -27,6 +27,7 @@ const AdminDashboard = () => {
           `/api/getUserStatsAndRecentSubscriptions`
         );
         const statsData = await statsResponse.json();
+        console.log("statsData",statsData);
 
         if (statsData.success) {
           setUserStats(statsData.data);
@@ -42,6 +43,7 @@ const AdminDashboard = () => {
 
         if (subscriptionsData.success) {
           setRecentSubscriptions(subscriptionsData.data);
+          console.log("subscriptionsData.data",subscriptionsData.data);
           setTotalPages(subscriptionsData.pagination.totalPages);
         }
       } catch (error) {

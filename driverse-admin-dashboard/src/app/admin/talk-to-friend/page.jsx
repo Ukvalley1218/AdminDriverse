@@ -104,7 +104,7 @@ const AdminTalkToFriend = () => {
 
           <button
             onClick={handleApplyFilters}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 flex items-center"
+            className="px-4 py-2 bg-black text-white rounded-lg flex items-center"
           >
             <FaFilter className="mr-2" /> Apply Filters
           </button>
@@ -155,7 +155,7 @@ const AdminTalkToFriend = () => {
                     <th className="p-3 border border-gray-300">Receiver</th>
                     <th className="p-3 border border-gray-300">Status</th>
                     <th className="p-3 border border-gray-300">Duration</th>
-                    <th className="p-3 border border-gray-300 text-center">Action</th>
+             
                   </tr>
                 </thead>
                 <tbody>
@@ -185,14 +185,14 @@ const AdminTalkToFriend = () => {
                         <td className="p-2 border border-gray-300 text-center">
                           {call.formattedDuration}
                         </td>
-                        <td className="p-3 border border-gray-300 text-center">
+                        {/* <td className="p-3 border border-gray-300 text-center">
                           <button
                             className="px-4 py-1 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition duration-300"
                             onClick={() => setUserId(call._id)}
                           >
                             Get User ID
                           </button>
-                        </td>
+                        </td> */}
                       </tr>
                     ))
                   ) : (

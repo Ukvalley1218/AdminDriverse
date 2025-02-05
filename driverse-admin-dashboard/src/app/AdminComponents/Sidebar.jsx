@@ -1,5 +1,6 @@
 "use client";
-import React, { useState,useEffect } from "react";
+
+import React, { useState, useEffect } from "react";
 import {
   FaTachometerAlt,
   FaUser,
@@ -30,7 +31,7 @@ const Sidebar = ({ isOpen, onClose }) => {
     try {
 
       const token = localStorage.getItem('accesstocken'); // Replace with your token retrieval method
-      console.log(token);
+
       const response = await fetch('/api/VarifyToken', {
         method: 'POST',
         headers: {
@@ -41,11 +42,10 @@ const Sidebar = ({ isOpen, onClose }) => {
       });
 
       const result = await response.json();
-      console.log("result",result)
 
       if (!response.ok) {
         console.error('Token validation failed:', result.message);
-         window.location.href = '/login';
+        window.location.href = '/login';
         return false;
       }
 
@@ -56,8 +56,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         return false;
       }
 
-   
-      console.log('Token is valid', result);
+
 
       return true;
 
@@ -75,7 +74,7 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const links = [
     { name: "Dashboard", icon: <FaTachometerAlt />, href: "/admin" },
-    
+
     { name: "Talk to Friend", icon: <FaUser />, href: "/admin/talk-to-friend" },
     {
       name: "Verification",
@@ -88,15 +87,26 @@ const Sidebar = ({ isOpen, onClose }) => {
     { name: "All user", icon: <FaUser />, href: "/admin/user" },
     { name: "Post mechanic", icon: <FaTools />, href: "/admin/mechanic" },
     { name: "Post Tow", icon: <FaTruck />, href: "/admin/tow" },
-    { name: "Create TalkTime", icon: <FaTruck />, href: "/admin/talk" },
-    // {
-    //   name: "Company",
-    //   icon: <FaBuilding />,
-    //   subLinks: [
-    //     { name: "Request", href: "/admin/company/request" },
-    //     { name: "Verified", href: "/admin/company/verified" },
-    //   ],
-    // },
+    { name: "Create TalkTime", icon: <FaTruck />, href: "/admin/Create-talk-time" },
+    {
+      name: "Company",
+      icon: <FaBuilding />,
+      subLinks: [
+        { name: "Mech Request", href: "/admin/company/requestMech" },
+        { name: "Tow Request", href: "/admin/company/requestTow" },
+        { name: "Vachical", href: "/admin/company/Vachical" },
+      ],
+    },
+
+    {
+      name: "All Requests",
+      icon: <FaBuilding />,
+      subLinks: [
+        { name: "Mech Request", href: "/admin/userrequest/UserRequestMech" },
+        { name: "Tow Request", href: "/admin/userrequest/UserRequestTow" },
+        // { name: "Vachical", href: "/admin/userrequest/Vachical" },
+      ],
+    },
     {
       name: "Reports",
       icon: <FaRegFileAlt />,
@@ -121,13 +131,16 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   return (
     <div
-      className={`fixed top-0 left-0 h-full bg-black text-white w-64 transform ${
-        isOpen ? "translate-x-0" : "-translate-x-full"
-      } transition-transform duration-300 lg:translate-x-0 z-50 overflow-y-auto`}
+      className={`fixed top-0 left-0 h-full bg-black text-white w-64 transform ${isOpen ? "translate-x-0" : "-translate-x-full"
+        } transition-transform duration-300 lg:translate-x-0 z-50 overflow-y-auto`}
     >
       <div className="flex justify-evenly items-center pt-4 pl-4 pb-4 border-b border-gray-700">
         <div className="h-10 w-10">
-          <Logo />
+          <img
+            src="/admin/favicon.png"
+            alt="Background"
+            className="absolute h-10 w-10 rounded-2xl "
+          />
         </div>
         <h1 className="text-2xl font-bold">DRIVERSE</h1>
         <button className="lg:hidden" onClick={onClose}>
@@ -139,11 +152,10 @@ const Sidebar = ({ isOpen, onClose }) => {
         {links.map((link, index) => (
           <div key={index}>
             <li
-              className={`p-4 flex items-center justify-between hover:bg-gray-700 cursor-pointer ${
-                pathname === link.href
-                  ? "bg-[#ffffff] text-black rounded-l-xl ml-2 hover:bg-slate-200"
-                  : ""
-              }`}
+              className={`p-4 flex items-center justify-between hover:bg-gray-700 cursor-pointer ${pathname === link.href
+                ? "bg-[#ffffff] text-black rounded-l-xl ml-2 hover:bg-slate-200"
+                : ""
+                }`}
               onClick={() => link.subLinks && toggleDrawer(link.name)}
             >
               {link.href ? (
@@ -172,11 +184,10 @@ const Sidebar = ({ isOpen, onClose }) => {
                 {link.subLinks.map((subLink, subIndex) => (
                   <li
                     key={subIndex}
-                    className={`p-2 hover:bg-gray-700 ${
-                      pathname === subLink.href
-                        ? "bg-[#ffffff] text-black rounded-l-xl ml-2 hover:bg-slate-200"
-                        : ""
-                    }`}
+                    className={`p-2 hover:bg-gray-700 ${pathname === subLink.href
+                      ? "bg-[#ffffff] text-black rounded-l-xl ml-2 hover:bg-slate-200"
+                      : ""
+                      }`}
                   >
                     <Link href={subLink.href}>{subLink.name}</Link>
                   </li>

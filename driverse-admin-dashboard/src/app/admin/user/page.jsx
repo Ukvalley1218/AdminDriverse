@@ -13,7 +13,8 @@ import {
   FaMapMarkerAlt,
   FaCheck,
   FaBan,
-  FaClock
+  FaClock,
+  X
 } from "react-icons/fa";
 import { LuDownload } from "react-icons/lu";
 import { FiUser } from "react-icons/fi";
@@ -239,24 +240,37 @@ const AdminUser = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedUser, setEditedUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [selectedServiceType, setSelectedServiceType] = useState("");
+  const [selectedServiceType, setSelectedServiceType] = useState([]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Fetch users data
+  const serviceType = ["Driver", "Company", "Agent", "Tower", "Mechanic"];
+
   const fetchData = async () => {
     try {
       const response = await axios.get(`/api/user`, {
         params: {
-          search: searchQuery,
-          startDate,
-          endDate,
-          page,
+          search: searchQuery || undefined,
+          startDate: startDate || undefined,
+          endDate: endDate || undefined,
+          page: page || 1,
+          serviceType: selectedServiceType.length ? selectedServiceType.join(",") : undefined, // Convert array to comma-separated string
         },
       });
-      setUsers(response.data.data);
+
+      setUsers(response.data.data || []);
       setTotalPages(response.data.totalPages || 1);
     } catch (error) {
       console.error("Error fetching users:", error);
     }
   };
+
+  useEffect(() => {
+    fetchData();
+  }, [searchQuery, startDate, endDate, page, selectedServiceType]);
+  // Added selectedServiceType as a dependency
+
 
   // Fetch single user data
   const fetchUserDetails = async (userId) => {
@@ -319,9 +333,20 @@ const AdminUser = () => {
     doc.save("users.pdf");
   };
 
-  useEffect(() => {
-    fetchData();
-  }, [searchQuery, startDate, endDate, page]);
+  const handleServiceTypeChange = (type) => {
+    setSelectedServiceType(prev =>
+      prev.includes(type)
+        ? prev.filter(t => t !== type)
+        : [...prev, type]
+    );
+  };
+
+  const removeServiceType = (typeToRemove) => {
+    setSelectedServiceType(prev =>
+      prev.filter(type => type !== typeToRemove)
+    );
+  };
+
 
   return (
     <>
@@ -356,7 +381,15 @@ const AdminUser = () => {
         </div>
 
         {/* Date Range Section */}
+
+
+
+
+
+
         <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
+
+
           <div className="flex items-center gap-2">
             <input
               type="date"
@@ -372,6 +405,80 @@ const AdminUser = () => {
               className="border border-gray-300 rounded-lg px-4 py-2"
             />
           </div>
+          <div className="p-6 max-w-xl w-full mx-auto">
+
+
+
+            <div className="space-y-1">
+              <label
+                htmlFor="serviceType"
+                className="text-sm font-medium text-gray-700"
+              >
+                Service Type
+              </label>
+
+              {/* Selected Items Tags */}
+              <div className="flex flex-wrap gap-2 min-h-8 mb-2">
+                {selectedServiceType.map(type => (
+                  <span
+                    key={type}
+                    className="inline-flex items-center px-2 py-1 rounded-md text-sm bg-blue-100 text-blue-700"
+                  >
+                    {type}
+                    <button
+                      onClick={() => removeServiceType(type)}
+                      className="ml-1 hover:text-blue-800"
+                    >
+                    
+                      <div className=" bg-blue-100 p-1 text-blue-800 rounded">X</div>
+                    </button>
+                  </span>
+                ))}
+              </div>
+
+              {/* Custom Dropdown */}
+              <div className="relative">
+                <button
+                  type="button"
+                  className="w-full px-4 py-2 text-left border border-gray-300 rounded-md shadow-sm bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                >
+                  Select Services
+                </button>
+
+                {isDropdownOpen && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto">
+                    {serviceType.map(type => (
+                      <div
+                        key={type}
+                        className={`
+                      px-4 py-2 cursor-pointer hover:bg-gray-100
+                      ${selectedServiceType.includes(type) ? 'bg-blue-50' : ''}
+                    `}
+                        onClick={() => handleServiceTypeChange(type)}
+                      >
+                        <div className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={selectedServiceType.includes(type)}
+                            onChange={() => { }}
+                            className="h-4 w-4 text-blue-600 rounded border-gray-300"
+                          />
+                          <span className="ml-2">{type}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Debug View */}
+            <div className="mt-4 p-4 bg-gray-50 rounded-md">
+              <p className="text-sm text-gray-500">Selected Services:</p>
+              <p className="text-sm">{selectedServiceType.join(', ') || 'None'}</p>
+            </div>
+          </div>
         </div>
 
         {/* User Cards Grid */}
@@ -380,12 +487,7 @@ const AdminUser = () => {
             <div
               key={user._id}
               className="bg-white border border-gray-200 rounded-lg p-2 shadow-sm hover:shadow-md transition-shadow">
-              <div className={`px-1 py-1 text-center rounded-full text-xs ${user.isVerified
-                ? 'bg-green-100 text-green-800'
-                : 'bg-yellow-100 text-yellow-800'
-                }`}>
-                {user.isVerified ? 'Verified' : 'Unverified'}
-              </div>
+
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
 
@@ -395,26 +497,33 @@ const AdminUser = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-sm">{user.username}</h3>
+
                     <p className="text-sm text-gray-500">{user.serviceType}</p>
                   </div>
                 </div>
-
+                <div className={`px-1 py-1 text-center rounded-full text-xs ${user.isVerified
+                  ? 'bg-green-100 text-green-800'
+                  : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                  {user.isVerified ? 'Verified' : 'Unverified'}
+                </div>
               </div>
 
-              <div className="space-y-3 mb-4">
+              <div className="space-y-2 mb-4">
                 <div className="flex items-center gap-2">
                   <FaEnvelope className="text-gray-400" />
-                  <span className="text- text-gray-600">{user.email}</span>
+                  <span className="text-gray-600">{user.email?.slice(0, 8)}...</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <FaPhone className="text-gray-400" />
-                  <span className="text-sm text-gray-600">{user.phone}</span>
+                  <span className="text-sm text-gray-600">{user.phone?.slice(0, 8)}...</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <FaMapMarkerAlt className="text-gray-400" />
-                  <span className="text-sm text-gray-600 truncate">{user.companyAddress}</span>
+                  <span className="text-sm text-gray-600 truncate">{user.companyAddress?.slice(0, 8)}...</span>
                 </div>
               </div>
+
 
               <div className="flex justify-between items-center pt-4 border-t">
                 <div className="flex gap-4 ">
