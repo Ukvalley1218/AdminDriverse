@@ -363,55 +363,52 @@ const AdminPremiumReports = () => {
         </div>
       </div>
       {/* User Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {data.data?.map((user) => (
-          <div key={user._id} className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-            <div className="flex items-center justify-between mb-4">
+          <div key={user._id} className="bg-white rounded-lg shadow-sm p-4 border border-gray-200">
+            <div className="flex items-center justify-between mb-3">
               <div className="flex items-center">
-                <div className="bg-blue-100 p-3 rounded-full mr-4">
-                  <FaUser className="text-blue-600 text-xl" />
+                <div className="bg-blue-50 p-2 rounded-full mr-2">
+                  <FaUser className="text-blue-500 text-sm" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-lg">{user.username}</h3>
-                  <p className="text-gray-600 text-sm">{user.email}</p>
+                <h3 className="font-medium text-xs capitalize">{user.username}</h3>
+                <p className="text-gray-500 text-xs">{user.email}</p>
                 </div>
               </div>
               <button
                 onClick={() => setSelectedUser(user)}
-                className="p-2 bg-blue-50 text-blue-600 rounded-full hover:bg-blue-100 transition-colors"
+                className="p-1.5 bg-blue-50 text-blue-500 rounded-full hover:bg-blue-100 transition-colors"
                 title="View Details"
               >
-                <FaEye size={20} />
+                <FaEye size={16} />
               </button>
             </div>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">Service Type</span>
-                <span className="font-semibold">{user.serviceType}</span>
+            <div className="space-y-2">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-500 uppercase">Service Type</span>
+                <span className="font-medium uppercase">{user.serviceType}</span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">Status</span>
-                <span className={`px-2 py-1 rounded-full text-sm ${user.subscriptionStatus === 'active'
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-gray-100 text-gray-800'
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-500 uppercase">Status</span>
+                <span className={`px-2 py-0.5 rounded-full uppercase tracking-wide ${user.subscriptionStatus === 'active'
+                    ? 'bg-green-50 text-green-600'
+                    : 'bg-gray-50 text-gray-600'
                   }`}>
                   {user.subscriptionStatus}
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">Payment Date</span>
-                <span>{new Date(user.subscriptionDetails?.paymentDate).toLocaleDateString()}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">Amount</span>
-                <span>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-500 uppercase">Amount</span>
+                <span className="font-medium">
                   {user.subscriptionDetails?.amountReceived
                     ? `$${(user.subscriptionDetails.amountReceived / 100).toFixed(2)}`
                     : 'N/A'}
                 </span>
               </div>
-              <div className="flex items-center justify-between">
-                <span className="text-gray-600">End Date</span>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-gray-500 uppercase">End Date</span>
                 <span>
                   {user.subscriptionDetails?.subscriptionEndDate
                     ? new Date(user.subscriptionDetails.subscriptionEndDate).toLocaleDateString()

@@ -104,7 +104,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       subLinks: [
         { name: "Mech Request", href: "/admin/userrequest/UserRequestMech" },
         { name: "Tow Request", href: "/admin/userrequest/UserRequestTow" },
-        // { name: "Vachical", href: "/admin/userrequest/Vachical" },
+        // { name: "Vachical", href: "/admin/company/Vachical" },
       ],
     },
     {
