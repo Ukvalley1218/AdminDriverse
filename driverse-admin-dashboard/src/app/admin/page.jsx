@@ -27,6 +27,7 @@ const AdminDashboard = () => {
           `/api/getUserStatsAndRecentSubscriptions`
         );
         const statsData = await statsResponse.json();
+        console.log("statsResponse",statsData);
         console.log("statsData",statsData);
 
         if (statsData.success) {

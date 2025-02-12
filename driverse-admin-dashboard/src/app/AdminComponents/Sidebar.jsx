@@ -84,6 +84,22 @@ const Sidebar = ({ isOpen, onClose }) => {
         { name: "Verified", href: "/admin/verification/verified" },
       ],
     },
+    {
+      name: "Agent Verification",
+      icon: <FaCog />,
+      subLinks: [
+        { name: "Request", href: "/admin/Agentkyc/AgentRequest" },
+        { name: "Verified", href: "/admin/Agentkyc/AgentVerify" },
+      ],
+    },
+    {
+      name: "Agent Pay Out",
+      icon: <FaCog />,
+      subLinks: [
+        { name: "Withdrawal Request", href: "/admin/AgentPayOut/RequestPayout" },
+        { name: "Withdrawal Completed", href: "/admin/AgentPayOut/CompletedPayout" },
+      ],
+    },
     { name: "All user", icon: <FaUser />, href: "/admin/user" },
     { name: "Post mechanic", icon: <FaTools />, href: "/admin/mechanic" },
     { name: "Post Tow", icon: <FaTruck />, href: "/admin/tow" },
