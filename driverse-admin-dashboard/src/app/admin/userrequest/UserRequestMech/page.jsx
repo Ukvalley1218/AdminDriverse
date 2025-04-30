@@ -247,7 +247,7 @@ const ServiceRequestsDashboard = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input
                 type="text"
-                placeholder="Search by username or email"
+                placeholder="Search by username "
                 value={filters.search}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"

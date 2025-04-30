@@ -165,7 +165,7 @@ const Page = () => {
                 ) : plans.length === 0 ? (
                     <p className="text-gray-600 text-center">No plans found.</p>
                 ) : (
-                    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div className="bg-white rounded-lg shadow-md overflow-x-auto">
                         <table className="min-w-full">
                             <thead className="bg-gray-50">
                                 <tr>

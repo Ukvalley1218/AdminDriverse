@@ -14,7 +14,6 @@ import {
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import Logo from "../svg/logo";
 
 const Sidebar = ({ isOpen, onClose }) => {
   const [openDrawer, setOpenDrawer] = useState({});
@@ -29,40 +28,27 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   async function checkToken() {
     try {
-
-      const token = localStorage.getItem('accesstocken'); // Replace with your token retrieval method
-
-      const response = await fetch('/api/VarifyToken', {
-        method: 'POST',
+      const token = localStorage.getItem("accesstocken");
+      const response = await fetch("/api/VarifyToken", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}` // Optional but recommended
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ token })
+        body: JSON.stringify({ token }),
       });
 
       const result = await response.json();
 
-      if (!response.ok) {
-        console.error('Token validation failed:', result.message);
-        window.location.href = '/login';
+      if (!response.ok || !result.isValid) {
+        console.error("Token validation failed:", result.message || "Invalid token");
+        window.location.href = "/login";
         return false;
       }
-
-      // Check for explicit validation result
-      if (!result.isValid) {
-        console.warn('Token is not valid');
-        window.location.href = '/login';
-        return false;
-      }
-
-
 
       return true;
-
     } catch (error) {
-      console.error('Validation request failed', error);
-      window.location.href = '/login';
+      console.error("Validation request failed", error);
       return false;
     }
   }
@@ -71,11 +57,11 @@ const Sidebar = ({ isOpen, onClose }) => {
     checkToken();
   }, []);
 
-
   const links = [
     { name: "Dashboard", icon: <FaTachometerAlt />, href: "/admin" },
-
     { name: "Talk to Friend", icon: <FaUser />, href: "/admin/talk-to-friend" },
+    { name: "Question", icon: <FaUser />, href: "/admin/question" },
+    { name: "Truck Details", icon: <FaUser />, href: "/admin/truckDeatils" },
     {
       name: "Verification",
       icon: <FaCog />,
@@ -100,66 +86,60 @@ const Sidebar = ({ isOpen, onClose }) => {
         { name: "Withdrawal Completed", href: "/admin/AgentPayOut/CompletedPayout" },
       ],
     },
-    { name: "All user", icon: <FaUser />, href: "/admin/user" },
-    { name: "Post mechanic", icon: <FaTools />, href: "/admin/mechanic" },
+    { name: "All User", icon: <FaUser />, href: "/admin/user" },
+    { name: "Post Mechanic", icon: <FaTools />, href: "/admin/mechanic" },
     { name: "Post Tow", icon: <FaTruck />, href: "/admin/tow" },
     { name: "Create TalkTime", icon: <FaTruck />, href: "/admin/Create-talk-time" },
+    { name: "Add Dynamic Plan", icon: <FaTruck />, href: "/admin/AddDynamicPlan" },
+    { name: "Create Promo Code ", icon: <FaTruck />, href: "/admin/Promo" },
     {
       name: "Company",
       icon: <FaBuilding />,
       subLinks: [
         { name: "Mech Request", href: "/admin/company/requestMech" },
         { name: "Tow Request", href: "/admin/company/requestTow" },
-        { name: "Vachical", href: "/admin/company/Vachical" },
+        { name: "Vehicle", href: "/admin/company/Vachical" },
       ],
     },
-
     {
       name: "All Requests",
       icon: <FaBuilding />,
       subLinks: [
-        { name: "Mech Request", href: "/admin/userrequest/UserRequestMech" },
-        { name: "Tow Request", href: "/admin/userrequest/UserRequestTow" },
-        // { name: "Vachical", href: "/admin/company/Vachical" },
+        { name: "Mechanic  Request", href: "/admin/userrequest/UserRequestMech" },
+        { name: "Tower Request", href: "/admin/userrequest/UserRequestTow" },
       ],
     },
     {
-      name: "Reports",
+      name: "Premium User Reports",
       icon: <FaRegFileAlt />,
       subLinks: [
-        { name: "User", href: "/admin/reports/user" },
+        { name: "Driver", href: "/admin/reports/user" },
         { name: "Mechanic", href: "/admin/reports/mechanic" },
         { name: "Tow", href: "/admin/reports/tow" },
+        { name: "Company", href: "/admin/reports/Company" },
         { name: "All Premium", href: "/admin/reports/all-premium" },
       ],
     },
-    // {
-    //   name: "Subscription",
-    //   icon: <FaRegFileAlt />,
-    //   subLinks: [
-    //     { name: "Cancel", href: "/admin/subscription/cancel" },
-    //     { name: "Not Renew", href: "/admin/subscription/not-renew" },
-    //     { name: "Payment Fail", href: "/admin/subscription/payment-fail" },
-    //   ],
-    // },
-    // { name: "Settings", icon: <FaCog />, href: "/admin/settings" },
   ];
 
   return (
     <div
-      className={`fixed top-0 left-0 h-full bg-black text-white w-64 transform ${isOpen ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 lg:translate-x-0 z-50 overflow-y-auto`}
+      className={`fixed top-0 left-0 h-full bg-black text-white w-64 transform ${
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      } transition-transform duration-300 lg:translate-x-0 z-50 overflow-y-auto`}
     >
-      <div className="flex justify-evenly items-center pt-4 pl-4 pb-4 border-b border-gray-700">
-        <div className="h-10 w-10">
-          <img
-            src="/admin/favicon.png"
-            alt="Background"
-            className="absolute h-10 w-10 rounded-2xl "
-          />
+      <div className="flex justify-between items-center pt-4 pl-4 pb-4 border-b border-gray-700">
+        <div className="flex items-center">
+          <div className="h-10 w-10">
+            <img
+              src="/admin/favicon.png"
+              alt="Logo"
+              className="h-10 w-10 rounded-2xl"
+            />
+          </div>
+          <h1 className="text-2xl font-bold ml-3">DRIVERSE</h1>
         </div>
-        <h1 className="text-2xl font-bold">DRIVERSE</h1>
-        <button className="lg:hidden" onClick={onClose}>
+        <button className="lg:hidden pr-4" onClick={onClose}>
           <FaTimes size={24} />
         </button>
       </div>
@@ -168,44 +148,40 @@ const Sidebar = ({ isOpen, onClose }) => {
         {links.map((link, index) => (
           <div key={index}>
             <li
-              className={`p-4 flex items-center justify-between hover:bg-gray-700 cursor-pointer ${pathname === link.href
-                ? "bg-[#ffffff] text-black rounded-l-xl ml-2 hover:bg-slate-200"
-                : ""
-                }`}
+              className={`p-4 flex items-center justify-between hover:bg-gray-700 cursor-pointer ${
+                pathname === link.href
+                  ? "bg-[#ffffff] text-black rounded-l-xl ml-2 hover:bg-slate-200"
+                  : ""
+              }`}
               onClick={() => link.subLinks && toggleDrawer(link.name)}
             >
-              {link.href ? (
-                <Link href={link.href} className="flex items-center w-full">
-                  {link.icon}
-                  <span className="ml-3">{link.name}</span>
-                </Link>
-              ) : (
-                <div
-                  className="flex items-center w-full cursor-pointer"
-                  onClick={() => toggleDrawer(link.name)}
-                >
-                  {link.icon}
-                  <span className="ml-3">{link.name}</span>
-                </div>
-              )}
-              {link.subLinks &&
-                (openDrawer[link.name] ? (
-                  <IoIosArrowUp />
-                ) : (
-                  <IoIosArrowDown />
-                ))}
+              <Link
+                href={link.href || "#"} // Use "#" as a fallback for items with subLinks
+                className="flex items-center w-full"
+              >
+                {link.icon}
+                <span className="ml-3">{link.name}</span>
+                {link.subLinks && (
+                  <span className="ml-auto">
+                    {openDrawer[link.name] ? <IoIosArrowUp /> : <IoIosArrowDown />}
+                  </span>
+                )}
+              </Link>
             </li>
             {link.subLinks && openDrawer[link.name] && (
               <ul className="ml-8">
                 {link.subLinks.map((subLink, subIndex) => (
                   <li
                     key={subIndex}
-                    className={`p-2 hover:bg-gray-700 ${pathname === subLink.href
-                      ? "bg-[#ffffff] text-black rounded-l-xl ml-2 hover:bg-slate-200"
-                      : ""
-                      }`}
+                    className={`p-2 hover:bg-gray-700 ${
+                      pathname === subLink.href
+                        ? "bg-[#ffffff] text-black rounded-l-xl ml-2 hover:bg-slate-200"
+                        : ""
+                    }`}
                   >
-                    <Link href={subLink.href}>{subLink.name}</Link>
+                    <Link href={subLink.href} className="block w-full">
+                      {subLink.name}
+                    </Link>
                   </li>
                 ))}
               </ul>

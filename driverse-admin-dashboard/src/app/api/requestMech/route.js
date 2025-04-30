@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server';
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
-    
+
     // Extract query parameters with defaults
     const page = searchParams.get('page') || 1;
     const limit = searchParams.get('limit') || 10;
@@ -13,7 +13,12 @@ export async function GET(request) {
     const search = searchParams.get('search') || '';
     const fromDate = searchParams.get('fromDate') || '';
     const toDate = searchParams.get('toDate') || '';
-    const serviceType = searchParams.get('serviceType') || '';
+
+    // Handle serviceType as an array
+    const serviceTypeParam = searchParams.get('serviceType');
+    const serviceType = serviceTypeParam
+      ? serviceTypeParam.split(',').map(type => type.trim())
+      : [];
 
     // Build query string for backend
     const queryParams = new URLSearchParams({
@@ -24,7 +29,7 @@ export async function GET(request) {
       search,
       fromDate,
       toDate,
-      serviceType
+      serviceType: serviceType.join(',')
     }).toString();
 
     // Your backend API URL
@@ -43,8 +48,8 @@ export async function GET(request) {
     }
 
     const data = await response.json();
+    console.log("data", data);
 
-    console.log("data",data);
     if (!data.success) {
       return NextResponse.json(data, { status: 400 });
     }
@@ -53,7 +58,6 @@ export async function GET(request) {
       success: true,
       data
     });
-
   } catch (error) {
     console.error('Error in UserRequestTow API:', error);
     return NextResponse.json(
@@ -66,4 +70,3 @@ export async function GET(request) {
     );
   }
 }
-

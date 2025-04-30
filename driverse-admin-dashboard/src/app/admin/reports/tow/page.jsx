@@ -23,26 +23,28 @@ const UserDetailsModal = ({ user, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white p-6 border-b border-gray-200 flex justify-between items-center">
-          <h2 className="text-2xl font-bold">User Details</h2>
+      <div className="bg-white rounded-lg w-full max-w-md sm:max-w-2xl max-h-[90vh] overflow-y-auto">
+        {/* Modal Header */}
+        <div className="sticky top-0 bg-white p-4 sm:p-6 border-b border-gray-200 flex justify-between items-center">
+          <h2 className="text-xl sm:text-2xl font-bold">User Details</h2>
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <FaTimes className="text-gray-600" />
+            <FaTimes className="text-gray-600 text-lg" />
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        {/* Modal Body */}
+        <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
           {/* User Profile */}
-          <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
-            <div className="bg-blue-100 p-4 rounded-full">
-              <FaUser className="text-blue-600 text-2xl" />
+          <div className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 bg-gray-50 rounded-lg">
+            <div className="bg-blue-100 p-3 rounded-full">
+              <FaUser className="text-blue-600 text-xl sm:text-2xl" />
             </div>
             <div>
-              <h3 className="text-xl font-bold">{user.username}</h3>
-              <div className="flex items-center gap-2 text-gray-600">
+              <h3 className="text-lg sm:text-xl font-bold">{user.username}</h3>
+              <div className="flex items-center gap-2 text-gray-600 text-sm sm:text-base">
                 <FaEnvelope />
                 <span>{user.email}</span>
               </div>
@@ -50,18 +52,18 @@ const UserDetailsModal = ({ user, onClose }) => {
           </div>
 
           {/* Service Info */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+          <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+            <h3 className="font-semibold text-lg flex items-center gap-2">
               <GiLaurelCrown className="text-yellow-500" />
               Service Information
             </h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
               <div>
-                <p className="text-gray-600">Service Type</p>
+                <p className="text-gray-600 text-sm">Service Type</p>
                 <p className="font-medium">{user.serviceType}</p>
               </div>
               <div>
-                <p className="text-gray-600">Status</p>
+                <p className="text-gray-600 text-sm">Status</p>
                 <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${user.subscriptionStatus === 'active'
                   ? 'bg-green-100 text-green-800'
                   : 'bg-gray-100 text-gray-800'
@@ -73,19 +75,19 @@ const UserDetailsModal = ({ user, onClose }) => {
           </div>
 
           {/* Payment Details */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+          <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+            <h3 className="font-semibold text-lg flex items-center gap-2">
               <FaDollarSign className="text-green-500" />
               Payment Details
             </h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
               <div>
-                <p className="text-gray-600">Payment ID</p>
-                <p className="font-medium font-mono text-sm">{user.subscriptionDetails?.paymentId || 'N/A'}</p>
+                <p className="text-gray-600 text-sm">Payment ID</p>
+                <p className="font-medium font-mono text-xs sm:text-sm">{user.subscriptionDetails?.paymentId || 'N/A'}</p>
               </div>
               <div>
-                <p className="text-gray-600">Amount</p>
-                <p className="font-medium">
+                <p className="text-gray-600 text-sm">Amount</p>
+                <p className="font-medium text-sm">
                   {user.subscriptionDetails?.amountReceived
                     ? `${(user.subscriptionDetails.amountReceived / 100).toFixed(2)} ${user.subscriptionDetails.currency?.toUpperCase() || 'USD'}`
                     : 'N/A'}
@@ -95,15 +97,15 @@ const UserDetailsModal = ({ user, onClose }) => {
           </div>
 
           {/* Subscription Timeline */}
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+          <div className="bg-gray-50 rounded-lg p-3 sm:p-4">
+            <h3 className="font-semibold text-lg flex items-center gap-2">
               <FaClock className="text-purple-500" />
               Subscription Timeline
             </h3>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
               <div>
-                <p className="text-gray-600">Start Date</p>
-                <p className="font-medium">
+                <p className="text-gray-600 text-sm">Start Date</p>
+                <p className="font-medium text-sm">
                   {user.subscriptionDetails?.paymentDate
                     ? new Date(user.subscriptionDetails.paymentDate).toLocaleDateString(undefined, {
                       year: 'numeric',
@@ -114,8 +116,8 @@ const UserDetailsModal = ({ user, onClose }) => {
                 </p>
               </div>
               <div>
-                <p className="text-gray-600">End Date</p>
-                <p className="font-medium">
+                <p className="text-gray-600 text-sm">End Date</p>
+                <p className="font-medium text-sm">
                   {user.subscriptionDetails?.subscriptionEndDate
                     ? new Date(user.subscriptionDetails.subscriptionEndDate).toLocaleDateString(undefined, {
                       year: 'numeric',
@@ -133,6 +135,7 @@ const UserDetailsModal = ({ user, onClose }) => {
   );
 };
 
+
 // Stats Card Component
 const StatCard = ({ title, value, icon: Icon, color }) => (
   <div className="bg-white rounded-lg shadow-md p-4 border border-gray-200">
@@ -145,7 +148,7 @@ const StatCard = ({ title, value, icon: Icon, color }) => (
 );
 
 // Main Dashboard Component
-const AdminPremiumReports = () => {
+const TwoPremiumReports = () => {
   const [data, setData] = useState({
     data: [],
     pagination: { total: 0, page: 1, limit: 10, pages: 0 },
@@ -163,8 +166,8 @@ const AdminPremiumReports = () => {
     search: "",
     fromDate: "",
     toDate: "",
-    serviceTypes:"Tower"
-  });
+    serviceTypes: ["Tower"]
+    });
 
   const [loading, setLoading] = useState(true);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -239,13 +242,13 @@ const AdminPremiumReports = () => {
   );
 
   // Service types array
-  // const serviceTypes = ['Driver', 'Tower', 'Mechanic', 'Company'];
+  const serviceTypes = ['Driver', 'Tower', 'Mechanic', 'Company'];
 
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Header Section */}
       <div className="flex flex-col lg:flex-row justify-between items-center mb-8">
-        <h1 className="text-2xl font-bold mb-4 lg:mb-0">Premium Users Dashboard</h1>
+        <h1 className="text-2xl font-bold mb-4 lg:mb-0">Premium Tow Dashboard</h1>
         <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
           <div className="relative flex-grow lg:flex-grow-0">
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -472,4 +475,4 @@ const AdminPremiumReports = () => {
   );
 };
 
-export default AdminPremiumReports;
+export default TwoPremiumReports;

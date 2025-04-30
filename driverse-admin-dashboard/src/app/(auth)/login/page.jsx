@@ -93,7 +93,7 @@ const Login = () => {
       <div className="w-full max-w-md p-8  bg-white border border-black rounded-md shadow-lg shadow-slate-400  z-10">
         <div className="flex justify-center items-center gap-x-4">
           <div className="h-10 w-10">
-            <Logo className="" />
+          <img src="/admin/favicon.png" alt="" className="h-10 " />
           </div>
           <h1 className=" text-2xl font-extrabold text-black">Driverse</h1>
         </div>
@@ -151,9 +151,10 @@ const Login = () => {
                   className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
                 >
                   {showPassword ? (
-                    <AiFillEyeInvisible className="text-gray-500" />
+                     <AiFillEye className="text-gray-500" />
+                     
                   ) : (
-                    <AiFillEye className="text-gray-500" />
+                    <AiFillEyeInvisible className="text-gray-500" />
                   )}
                 </span>
               </div>

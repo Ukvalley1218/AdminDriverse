@@ -180,11 +180,11 @@ const AdminAgentRequest = () => {
                     <div className="flex gap-4 mt-4 sm:mt-0">
                         <div className="bg-white p-3 rounded-lg shadow">
                             <p className="text-sm text-gray-500">Verified</p>
-                            <p className="text-lg font-bold text-green-600">{pagination.verifiedCount}</p>
+                            <p className="text-lg font-bold text-center  text-green-600">{pagination.verifiedCount}</p>
                         </div>
                         <div className="bg-white p-3 rounded-lg shadow">
                             <p className="text-sm text-gray-500">Pending</p>
-                            <p className="text-lg font-bold text-yellow-600">{pagination.unverifiedCount}</p>
+                            <p className="text-lg font-bold  text-center text-yellow-600">{pagination.unverifiedCount}</p>
                         </div>
                     </div>
                 </div>

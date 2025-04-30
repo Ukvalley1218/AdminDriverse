@@ -1,47 +1,37 @@
 "use client";
-import Head from "next/head";
 import React, { useState, useEffect } from "react";
+import Head from "next/head";
 import axios from "axios";
-import {
-  FaBell,
-  FaEdit,
-  FaEnvelope,
-  FaEye,
-  FaSearch,
-  FaTrash,
+import { 
+  FaSearch, 
+  FaDownload, 
+  FaUser, 
+  FaMapMarkerAlt, 
+  FaClock, 
+  FaChevronLeft, 
+  FaChevronRight 
 } from "react-icons/fa";
-import { LuDownload } from "react-icons/lu";
-import { BiSort } from "react-icons/bi";
-import { FiUser } from "react-icons/fi";
-import { TbCurrencyDollarCanadian } from "react-icons/tb";
-import { HiOutlineClock } from "react-icons/hi";
 
-const AdminMechanic = () => {
+const AdminMechanicList = () => {
   const [mechanics, setMechanics] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
-
-
-
-  
   const fetchData = async () => {
     try {
-      const response = await axios.get(`/api/mech`,
-        {
-          params: {
-            page: currentPage,
-            search: searchTerm,
-            startDate,
-            endDate,
-          },
-        }
-      );
+      const response = await axios.get(`/api/mech`, {
+        params: {
+          page: currentPage,
+          search: searchTerm,
+          startDate,
+          endDate,
+        },
+      });
       setMechanics(response.data.data);
-      // console.log(response.data.data);
       setTotalPages(response.data.totalPages || 1);
     } catch (error) {
       console.error("Error fetching mechanics data:", error);
@@ -54,10 +44,8 @@ const AdminMechanic = () => {
   };
 
   const handleDownload = () => {
-    // CSV Header
     const csvContent = [
       ["MechanicName", "ServiceType", "ServiceDescription", "StartTime", "EndTime", "Location", "Availability", "Radius", "Comment"],
-      // Map the mechanics data to extract the required fields
       ...mechanics.map(({ 
         mechanic, 
         serviceType, 
@@ -80,10 +68,9 @@ const AdminMechanic = () => {
         comment || "N/A",
       ]),
     ]
-      .map((row) => row.join(",")) // Join each row with commas
-      .join("\n"); // Separate rows with newline characters
+      .map((row) => row.join(","))
+      .join("\n");
   
-    // Create and trigger the download
     const blob = new Blob([csvContent], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
@@ -92,98 +79,217 @@ const AdminMechanic = () => {
     link.click();
     URL.revokeObjectURL(url);
   };
-  
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+
+    const sortedMechanics = [...mechanics].sort((a, b) => {
+      if (key === 'mechanic') {
+        const valA = a.mechanic?.username || '';
+        const valB = b.mechanic?.username || '';
+        return direction === 'asc' 
+          ? valA.localeCompare(valB) 
+          : valB.localeCompare(valA);
+      }
+      if (key === 'startTime' || key === 'endTime') {
+        const valA = new Date(a[key] || 0);
+        const valB = new Date(b[key] || 0);
+        return direction === 'asc' 
+          ? valA - valB 
+          : valB - valA;
+      }
+      return 0;
+    });
+
+    setMechanics(sortedMechanics);
+  };
 
   useEffect(() => {
     fetchData();
   }, [currentPage, searchTerm, startDate, endDate]);
 
   return (
-    <>
+    <div className="container mx-auto px-4 py-8">
       <Head>
-        <title>Admin Dashboard</title>
+        <title>Mechanic Management</title>
       </Head>
-      <div className="container h-full">
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row items-center content-start justify-between mb-4">
-          <h1 className="hidden sm:block text-xl sm:ml-7 lg:ml-0 sm:text-2xl lg:text-4xl font-bold mb-2 sm:mb-0">
-            Mechanic
-          </h1>
-          <div className="flex flex-row items-center justify-end sm:justify-center gap-y-2 sm:gap-y-0 sm:gap-x-4">
-            <div className="flex items-center border border-gray-800 rounded-xl p-2 w-[65%] sm:w-auto">
-              <FaSearch className="text-gray-500" />
-              <input
-                type="text"
-                placeholder="Search..."
-                className="ml-2 outline-none border-none flex-grow sm:flex-grow-0 w-full"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <button
-              onClick={handleSearch}
-              className="h-10 w-max bg-black text-white shadow-md flex justify-between items-center rounded-xl p-2 border-2 gap-x-2"
-            >
-              Search
-            </button>
-            <button
-              onClick={handleDownload}
-              className="h-10 w-max bg-black text-white shadow-md flex justify-between items-center rounded-xl p-2 border-2 gap-x-2"
-            >
-              <LuDownload size={24} />
-              Download
-            </button>
+
+      {/* Header and Search Section */}
+      <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-4 md:mb-0">
+          Mechanic Service
+        </h1>
+        
+        <div className="flex space-x-4 w-full md:w-auto">
+          <div className="relative flex-grow">
+            <input
+              type="text"
+              placeholder="Search mechanics..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           </div>
-        </div>
-
-        {/* Cards Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-          {mechanics.map((item, index) => (
-            <div
-              key={index}
-              className="border border-gray-200 rounded-lg p-4 shadow-md flex flex-col items-start"
-            >
-              <div className="flex items-center mb-4">
-                <FiUser className="text-white text-4xl mr-4 bg-slate-900 p-2 rounded-full" />
-                <h2 className="font-bold text-lg">{item?.mechanic?.username}</h2>
-              </div>
-              <div className="flex items-center mb-2">
-                <TbCurrencyDollarCanadian className="text-gray-800 mr-2 h-7 w-7" />
-                <span className="font-sm">{item.location}</span>
-              </div>
-              <div className="flex items-center mb-4">
-                <HiOutlineClock className="text-gray-800 h-7 w-7 mr-2" />
-                <span>
-                  {item.startTime} to {item.endTime}
-                </span>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Pagination Section */}
-        <div className="flex items-center justify-between mt-6">
-          <button
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage((prev) => prev - 1)}
-            className="px-4 py-2 border border-gray-700 rounded-md bg-gray-200 text-gray-600 hover:bg-gray-300"
+          
+          <button 
+            onClick={handleSearch} 
+            className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Prev
+            <FaSearch className="mr-2" />
+            Search
           </button>
-          <span>
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
+          
+          <button 
+            onClick={handleDownload} 
+            className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <FaDownload className="mr-2" />
+            Download
+          </button>
+        </div>
+      </div>
+
+      {/* Date Range Filter */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-4">
+          <input
+            type="date"
+            className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={startDate}
+            onChange={(e) => setStartDate(e.target.value)}
+          />
+          <span className="text-gray-500">to</span>
+          <input
+            type="date"
+            className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={endDate}
+            onChange={(e) => setEndDate(e.target.value)}
+          />
+        </div>
+      </div>
+
+      {/* Mechanics List */}
+      <div className="bg-white shadow-md rounded-lg overflow-x-auto">
+        <table className="w-full table-auto">
+          <thead className="bg-gray-100">
+            <tr>
+              <th 
+                className="px-4 py-3 text-left cursor-pointer hover:bg-gray-200"
+                onClick={() => handleSort('mechanic')}
+              >
+                <div className="flex items-center">
+                  Mechanic Name
+                  {sortConfig.key === 'mechanic' && (
+                    <span className="ml-2">
+                      {sortConfig.direction === 'asc' ? '▲' : '▼'}
+                    </span>
+                  )}
+                </div>
+              </th>
+              <th 
+                className="px-4 py-3 text-left cursor-pointer hover:bg-gray-200"
+                onClick={() => handleSort('serviceType')}
+              >
+                Service Type
+              </th>
+              <th 
+                className="px-4 py-3 text-left cursor-pointer hover:bg-gray-200"
+                onClick={() => handleSort('startTime')}
+              >
+                <div className="flex items-center">
+                  Start Time
+                  {sortConfig.key === 'startTime' && (
+                    <span className="ml-2">
+                      {sortConfig.direction === 'asc' ? '▲' : '▼'}
+                    </span>
+                  )}
+                </div>
+              </th>
+              <th 
+                className="px-4 py-3 text-left cursor-pointer hover:bg-gray-200"
+                onClick={() => handleSort('endTime')}
+              >
+                <div className="flex items-center">
+                  End Time
+                  {sortConfig.key === 'endTime' && (
+                    <span className="ml-2">
+                      {sortConfig.direction === 'asc' ? '▲' : '▼'}
+                    </span>
+                  )}
+                </div>
+              </th>
+              <th className="px-4 py-3 text-left">Location</th>
+            </tr>
+          </thead>
+          <tbody>
+            {mechanics.map((item, index) => (
+              <tr 
+                key={index} 
+                className="border-b hover:bg-gray-50 transition-colors"
+              >
+                <td className="px-4 py-3 flex items-center">
+                  <FaUser className="mr-3 text-blue-600" />
+                  {item.mechanic?.username || 'N/A'}
+                </td>
+                <td className="px-4 py-3">{item.serviceType || 'N/A'}</td>
+                <td className="px-4 py-3">{item.startTime || 'N/A'}</td>
+                <td className="px-4 py-3">{item.endTime || 'N/A'}</td>
+                <td className="px-4 py-3 flex items-center">
+                  <FaMapMarkerAlt className="mr-2 text-blue-600" />
+                  {item.location || 'N/A'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="mt-8 flex flex-col sm:flex-row items-center justify-between">
+        <div className="flex items-center space-x-2 mb-4 sm:mb-0">
+          <button 
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+          
+          {[...Array(totalPages)].map((_, index) => (
+            <button
+              key={index + 1}
+              className={`px-4 py-2 border rounded-lg transition-colors ${
+                currentPage === index + 1 
+                  ? 'bg-blue-600 text-white' 
+                  : 'bg-white text-gray-700 hover:bg-gray-100'
+              }`}
+              onClick={() => setCurrentPage(index + 1)}
+            >
+              {index + 1}
+            </button>
+          ))}
+          
+          <button 
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
             disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((prev) => prev + 1)}
-            className="px-4 py-2 border border-gray-700 rounded-md bg-gray-200 text-gray-600 hover:bg-gray-300"
           >
             Next
           </button>
         </div>
+
+        <div className="text-gray-600">
+          Showing {(currentPage - 1) * 10 + 1}-
+          {Math.min(currentPage * 10, mechanics.length)} of {mechanics.length} results
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 
-export default AdminMechanic;
+export default AdminMechanicList;

@@ -1,75 +1,111 @@
 "use client"
 import React, { useState, useEffect } from "react";
 import Head from "next/head";
-import {
-  FaBell,
-  FaEdit,
-  FaEnvelope,
-  FaEye,
-  FaSearch,
-  FaTrash,
-} from "react-icons/fa";
-import { LuDownload } from "react-icons/lu";
-
-import { FiUser } from "react-icons/fi";
-import { TbCurrencyDollarCanadian } from "react-icons/tb";
-import { HiOutlineClock } from "react-icons/hi";
 import axios from "axios";
+import {
+  FaSearch,
+  FaDownload,
+  FaUser,
+  FaTruck,
+  FaClock,
+  FaCalendarAlt
+} from "react-icons/fa";
 
-const AdminTow = () => {
+const AdminTowList = () => {
   const [towData, setTowData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [entriesPerPage, setEntriesPerPage] = useState(10);
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(
-        `/api/Tower`,
-        {
-          params: {
-            page: currentPage,
-            search: searchTerm,
-            startDate,
-            endDate,
-          },
-        }
-      );
+      const response = await axios.get(`/api/Tower`, {
+        params: {
+          page: currentPage,
+          search: searchTerm,
+          startDate,
+          endDate,
+        },
+      });
       setTowData(response.data.data);
+
       setTotalPages(response.data.pages || 1);
     } catch (error) {
       console.error("Error fetching tow data:", error);
     }
   };
 
-  const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
-    setCurrentPage(1);
-  };
+  const handleDownload = () => {
+    const csvContent = [
+      ["Email", "Service Type", "Start Time", "End Time"],
+      ...towData.map((item) => [
+        item.Tower?.email || "N/A",
+        item.serviceType || "N/A",
+        formatTime(item.startTime) || "N/A",
+        formatTime(item.endTime) || "N/A"
+      ])
+    ]
+      .map((row) => row.join(","))
+      .join("\n");
 
-  const handleDateChange = (type, value) => {
-    if (type === 'start') {
-      setStartDate(value);
-    } else {
-      setEndDate(value);
-    }
-    setCurrentPage(1);
+    const blob = new Blob([csvContent], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "tow_services.csv";
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   const formatTime = (timeString) => {
     if (!timeString) return '';
     if (timeString.includes('GMT')) {
       const date = new Date(timeString);
-      return date.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
+      return date.toLocaleTimeString('en-US', {
+        hour: '2-digit',
         minute: '2-digit',
-        hour12: true 
+        hour12: true
       });
     }
     return timeString;
+  };
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+
+    const sortedTowData = [...towData].sort((a, b) => {
+      if (key === 'email') {
+        const valA = a.Tower?.email || '';
+        const valB = b.Tower?.email || '';
+        return direction === 'asc'
+          ? valA.localeCompare(valB)
+          : valB.localeCompare(valA);
+      }
+      if (key === 'startTime' || key === 'endTime') {
+        const valA = new Date(a[key] || 0);
+        const valB = new Date(b[key] || 0);
+        return direction === 'asc'
+          ? valA - valB
+          : valB - valA;
+      }
+      if (key === 'serviceType') {
+        const valA = a.serviceType || '';
+        const valB = b.serviceType || '';
+        return direction === 'asc'
+          ? valA.localeCompare(valB)
+          : valB.localeCompare(valA);
+      }
+      return 0;
+    });
+
+    setTowData(sortedTowData);
   };
 
   useEffect(() => {
@@ -77,131 +113,171 @@ const AdminTow = () => {
   }, [currentPage, searchTerm, startDate, endDate]);
 
   return (
-    <>
+    <div className="container mx-auto px-4 py-8">
       <Head>
-        <title>Admin Dashboard</title>
+        <title>Tow Services Management</title>
       </Head>
-      <div className="container h-full">
-        {/* Header Section */}
-        <div className="flex flex-col sm:flex-row items-center content-start justify-between mb-4">
-          <h1 className="hidden sm:block text-xl sm:ml-7 lg:ml-0 sm:text-2xl lg:text-4xl font-bold mb-2 sm:mb-0">
-            Tow
-          </h1>
 
-          <div className="flex flex-row items-center justify-center gap-y-2 sm:gap-y-0 sm:gap-x-4">
-            <div className="flex items-center ml-2 border border-gray-800 rounded-xl p-1 px-2 w-full sm:w-auto">
-              <FaSearch className="text-gray-500" />
-              <input
-                type="text"
-                placeholder="Search..."
-                value={searchTerm}
-                onChange={handleSearch}
-                className="ml-2 outline-none border-none flex-grow sm:flex-grow-0"
-              />
-            </div>
-            
-           
+      {/* Header and Search Section */}
+      <div className="flex flex-col md:flex-row justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-4 md:mb-0">
+          Tow Services
+        </h1>
 
-            <button className="h-10 w-max bg-black text-white shadow-md flex justify-between items-center rounded-xl p-2 border-2 gap-x-2">
-              <LuDownload size={24} />
-              <h1>Download</h1>
-            </button>
-          </div>
-        </div>
-
-        {/* Range Selector Section */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mt-6">
-         
-
-          <div className="flex items-center gap-2">
-            <div className="flex flex-col sm:flex-row items-center gap-2">
-              <input
-                type="date"
-                className="border border-gray-700 rounded-md px-4 py-2"
-                value={startDate}
-                onChange={(e) => handleDateChange('start', e.target.value)}
-              />
-              <span className="text-slate-600">to</span>
-              <input
-                type="date"
-                className="border border-gray-700 rounded-md px-4 py-2"
-                value={endDate}
-                onChange={(e) => handleDateChange('end', e.target.value)}
-              />
-            </div>
+        <div className="flex space-x-4 w-full md:w-auto">
+          <div className="relative flex-grow">
+            <input
+              type="text"
+              placeholder="Search tow services..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           </div>
 
-          
+          <button
+            onClick={handleDownload}
+            className="flex items-center justify-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <FaDownload className="mr-2" />
+            Download
+          </button>
         </div>
+      </div>
 
-        {/* Cards Section */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-          {towData.map((item) => (
-            <div
-              key={item._id}
-              className="border border-gray-200 rounded-lg p-4 shadow-md flex flex-col items-start"
-            >
-              <div className="flex items-center mb-4">
-                <FiUser className="text-white text-4xl mr-4 bg-slate-900 p-2 rounded-full" />
-                <h2 className="font-bold text-sm">{item.Tower.email}</h2>
-              </div>
-              <div className="flex items-center mb-2">
-                <TbCurrencyDollarCanadian className="text-gray-800 mr-2 h-7 w-7" />
-                <span>{item.serviceType}</span>
-              </div>
-              <div className="flex items-center mb-4">
-                <HiOutlineClock className="text-gray-800 h-7 w-7 mr-2" />
-                <div className="flex items-center gap-x-2">
-                  <span>{formatTime(item.startTime)}</span>
-                  <span>to</span>
-                  <span>{formatTime(item.endTime)}</span>
-                </div>
-              </div>
-              
-            </div>
-          ))}
-        </div>
-
-        {/* Pagination Section */}
-        <div className="flex flex-col sm:flex-row items-center justify-between mt-6">
-          <div className="flex items-center space-x-2">
-            <button 
-              className="px-4 py-2 border border-gray-700 rounded-md bg-gray-200 text-gray-600 hover:bg-gray-300"
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-              disabled={currentPage === 1}
-            >
-              Prev
-            </button>
-            {[...Array(totalPages)].map((_, index) => (
-              <button
-                key={index + 1}
-                className={`px-4 py-2 border border-gray-700 rounded-md ${
-                  currentPage === index + 1 ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-600'
-                } hover:bg-gray-300`}
-                onClick={() => setCurrentPage(index + 1)}
-              >
-                {index + 1}
-              </button>
-            ))}
-            <button 
-              className="px-4 py-2 border border-gray-700 rounded-md bg-gray-200 text-gray-600 hover:bg-gray-300"
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-              disabled={currentPage === totalPages}
-            >
-              Next
-            </button>
+      {/* Date Range Filter */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center">
+            <FaCalendarAlt className="mr-2 text-gray-600" />
+            <input
+              type="date"
+              className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
           </div>
-
-          <div className="mt-4 sm:mt-0">
-            <span className="text-gray-600">
-              Showing {((currentPage - 1) * entriesPerPage) + 1}-
-              {Math.min(currentPage * entriesPerPage, towData.length)} of {towData.length} results
-            </span>
+          <span className="text-gray-500">to</span>
+          <div className="flex items-center">
+            <FaCalendarAlt className="mr-2 text-gray-600" />
+            <input
+              type="date"
+              className="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              value={endDate}
+              onChange={(e) => setEndDate(e.target.value)}
+            />
           </div>
         </div>
       </div>
-    </>
+
+      {/* Tow Services List */}
+      <div className="bg-white shadow-md rounded-lg overflow-x-auto">
+
+        <table className="w-full table-auto border-collapse border border-gray-200">
+          <thead className="bg-gray-100">
+            <tr>
+              <th
+                className="px-4 py-3 text-left cursor-pointer hover:bg-gray-200 border border-gray-300"
+                onClick={() => handleSort("email")}
+              >
+                <div className="flex items-center">
+                  Email
+                
+                </div>
+              </th>
+              <th
+                className="px-4 py-3 text-left cursor-pointer hover:bg-gray-200 border border-gray-300"
+                onClick={() => handleSort("serviceType")}
+              >
+                <div className="flex items-center">
+                  Service Type
+                  
+                </div>
+              </th>
+              <th
+                className="px-4 py-3 text-left cursor-pointer hover:bg-gray-200 border border-gray-300"
+                onClick={() => handleSort("startTime")}
+              >
+                <div className="flex items-center">
+                  Start Time
+                 
+                </div>
+              </th>
+              <th
+                className="px-4 py-3 text-left cursor-pointer hover:bg-gray-200 border border-gray-300"
+                onClick={() => handleSort("endTime")}
+              >
+                <div className="flex items-center">
+                  End Time
+                 
+                </div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            {towData.map((item, index) => (
+              <tr key={index} className="border-b hover:bg-gray-50 transition-colors">
+                <td className="px-4 py-3 flex items-center border border-gray-300">
+                  <FaUser className="mr-3 text-blue-600" />
+                  {item.Tower?.email || "N/A"}
+                </td>
+                <td className="px-4 py-3 border border-gray-300">{item.serviceType || "N/A"}</td>
+                <td className="px-4 py-3 border border-gray-300">
+                  <FaClock className="mr-2 inline text-blue-600" />
+                  {formatTime(item.startTime) || "N/A"}
+                </td>
+                <td className="px-4 py-3 border border-gray-300">
+                  <FaClock className="mr-2 inline text-blue-600" />
+                  {formatTime(item.endTime) || "N/A"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+
+      </div>
+
+      {/* Pagination */}
+      <div className="mt-8 flex flex-col sm:flex-row items-center justify-between">
+        <div className="flex items-center space-x-2 mb-4 sm:mb-0">
+          <button
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+          >
+            Previous
+          </button>
+
+          {[...Array(totalPages)].map((_, index) => (
+            <button
+              key={index + 1}
+              className={`px-4 py-2 border rounded-lg transition-colors ${currentPage === index + 1
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-700 hover:bg-gray-100'
+                }`}
+              onClick={() => setCurrentPage(index + 1)}
+            >
+              {index + 1}
+            </button>
+          ))}
+
+          <button
+            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors disabled:opacity-50"
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+          >
+            Next
+          </button>
+        </div>
+
+        <div className="text-gray-600">
+          Showing {(currentPage - 1) * 10 + 1}-
+          {Math.min(currentPage * 10, towData.length)} of {towData.length} results
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default AdminTow;
+export default AdminTowList;

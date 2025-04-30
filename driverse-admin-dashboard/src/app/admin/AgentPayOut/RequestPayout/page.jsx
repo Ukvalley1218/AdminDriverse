@@ -355,8 +355,8 @@ const WithdrawalRequestsPage = () => {
     const handleConfirmPayment = async () => {
         try {
             // For COMPLETED status, use a different endpoint
-            const endpoint = confirmationData.status === 'COMPLETED' 
-                ? '/api/AgentPayout/complete' 
+            const endpoint = confirmationData.status === 'COMPLETED'
+                ? '/api/AgentPayout/complete'
                 : '/api/AgentPayout/confiram';
 
             const response = await fetch(endpoint, {
@@ -406,7 +406,7 @@ const WithdrawalRequestsPage = () => {
                     <h1 className="text-2xl font-bold">Withdrawal Requests</h1>
                     <button
                         onClick={handleDownload}
-                        className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+                        className="px-3 py-2 bg-green-600 text-white rounded hover:bg-green-700"
                     >
                         Download CSV
                     </button>
@@ -522,7 +522,7 @@ const WithdrawalRequestsPage = () => {
                     <div className="text-sm text-gray-600">
                         Showing {((pagination.page - 1) * pagination.limit) + 1} to {Math.min(pagination.page * pagination.limit, pagination.total)} of {pagination.total} results
                     </div>
-                    <div className="space-x-2">
+                    <div className="flex flex-col space-y-2 md:flex-row md:space-x-4 md:space-y-0">
                         <button
                             disabled={pagination.page === 1}
                             onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
@@ -538,6 +538,7 @@ const WithdrawalRequestsPage = () => {
                             Next
                         </button>
                     </div>
+
                 </div>
             </div>
 
@@ -565,7 +566,7 @@ const WithdrawalRequestsPage = () => {
                             </button>
                             <button
                                 onClick={handleConfirmPayment}
-                                className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800"
+                                className="px-4  py-2 bg-black text-white rounded hover:bg-gray-800"
                             >
                                 Confirm
                             </button>

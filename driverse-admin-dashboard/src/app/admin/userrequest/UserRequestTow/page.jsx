@@ -1,193 +1,3 @@
-// // app/tow-requests/page.jsx
-// 'use client';
-// import { useState, useEffect } from 'react';
-
-// const TowRequestsPage = () => {
-//   const [requests, setRequests] = useState([]);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState(null);
-//   const [currentPage, setCurrentPage] = useState(1);
-//   const [filters, setFilters] = useState({
-//     search: '',
-//     serviceType: '',
-//     fromDate: '',
-//     toDate: ''
-//   });
-
-//   const fetchRequests = async () => {
-//     try {
-//       setLoading(true);
-//       const queryParams = new URLSearchParams({
-//         page: currentPage,
-//         limit: 10,
-//         search: filters.search,
-//         serviceType: filters.serviceType,
-//         fromDate: filters.fromDate,
-//         toDate: filters.toDate
-//       });
-
-//       const response = await fetch(`/api/requestTow?${queryParams}`);
-//       const data = await response.json();
-
-//       if (!data.success) {
-//         throw new Error(data.message || 'Failed to fetch requests');
-//       }
-
-//       setRequests(data.data);
-//       setError(null);
-//     } catch (err) {
-//       setError(err.message);
-//     } finally {
-//       setLoading(false);
-//     }
-//   };
-
-//   useEffect(() => {
-//     fetchRequests();
-//   }, [currentPage, filters]);
-
-//   const handleSearch = (value) => {
-//     setFilters(prev => ({ ...prev, search: value }));
-//     setCurrentPage(1);
-//   };
-
-//   return (
-//     <div className="container mx-auto p-4">
-//       <div className="bg-white rounded-lg shadow-md">
-//         <div className="p-6 border-b border-gray-200">
-//           <h2 className="text-2xl font-semibold text-gray-800">Towing Service Requests</h2>
-//         </div>
-        
-//         <div className="p-6">
-//           {/* Filters */}
-//           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-//             <input
-//               type="text"
-//               placeholder="Search by username"
-//               value={filters.search}
-//               onChange={(e) => handleSearch(e.target.value)}
-//               className="w-full p-2 border border-gray-300 rounded-md"
-//             />
-//             <select
-//               value={filters.serviceType}
-//               onChange={(e) => setFilters(prev => ({ ...prev, serviceType: e.target.value }))}
-//               className="w-full p-2 border border-gray-300 rounded-md"
-//             >
-//               <option value="">All Service Types</option>
-//               <option value="emergency">Emergency</option>
-//               <option value="scheduled">Scheduled</option>
-//               <option value="roadside">Roadside</option>
-//             </select>
-//             <input
-//               type="date"
-//               value={filters.fromDate}
-//               onChange={(e) => setFilters(prev => ({ ...prev, fromDate: e.target.value }))}
-//               className="w-full p-2 border border-gray-300 rounded-md"
-//             />
-//             <input
-//               type="date"
-//               value={filters.toDate}
-//               onChange={(e) => setFilters(prev => ({ ...prev, toDate: e.target.value }))}
-//               className="w-full p-2 border border-gray-300 rounded-md"
-//             />
-//           </div>
-
-//           {/* Table */}
-//           <div className="overflow-x-auto">
-//             {loading ? (
-//               <div className="text-center py-4">Loading...</div>
-//             ) : error ? (
-//               <div className="text-red-500 text-center py-4">{error}</div>
-//             ) : (
-//               <table className="min-w-full table-auto">
-//                 <thead className="bg-gray-50">
-//                   <tr>
-//                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Users</th>
-//                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Service Details</th>
-//                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location & Status</th>
-//                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-//                   </tr>
-//                 </thead>
-//                 <tbody className="bg-white divide-y divide-gray-200">
-//                   {requests.requests?.map((request) => (
-//                     <tr key={request._id} className="hover:bg-gray-50">
-//                       <td className="px-6 py-4 whitespace-nowrap">
-//                         <div className="text-sm">
-//                           {request.users.map((user, index) => (
-//                             <div key={index}>
-//                               {user.userName} - {user.userEmail}
-//                             </div>
-//                           ))}
-//                         </div>
-//                       </td>
-//                       <td className="px-6 py-4">
-//                         <div className="text-sm text-gray-900">
-//                           <div>Type: {request.serviceType}</div>
-//                           <div>Vehicle: {request.vehicleType}</div>
-//                           <div>Reason: {request.towingReason}</div>
-//                         </div>
-//                       </td>
-//                       <td className="px-6 py-4">
-//                         <div className="text-sm text-gray-900">
-//                           <div>{request.location}</div>
-//                           <span className={`mt-1 px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-//                             request.isVerified 
-//                               ? 'bg-green-100 text-green-800'
-//                               : 'bg-yellow-100 text-yellow-800'
-//                           }`}>
-//                             {request.isVerified ? 'Verified' : 'Pending'}
-//                           </span>
-//                         </div>
-//                       </td>
-//                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-//                         {new Date(request.createdAt).toLocaleDateString()}
-//                       </td>
-//                     </tr>
-//                   ))}
-//                 </tbody>
-//               </table>
-//             )}
-//           </div>
-
-//           {/* Pagination */}
-//           {requests.pagination && (
-//             <div className="flex justify-between items-center mt-6 border-t pt-4">
-//               <button
-//                 onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-//                 disabled={currentPage === 1}
-//                 className={`px-4 py-2 rounded-md ${
-//                   currentPage === 1
-//                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-//                     : 'bg-blue-500 text-white hover:bg-blue-600'
-//                 }`}
-//               >
-//                 Previous
-//               </button>
-//               <span className="text-gray-600">
-//                 Page {currentPage} of {requests.pagination.totalPages}
-//               </span>
-//               <button
-//                 onClick={() => setCurrentPage(prev => prev + 1)}
-//                 disabled={currentPage === requests.pagination.totalPages}
-//                 className={`px-4 py-2 rounded-md ${
-//                   currentPage === requests.pagination.totalPages
-//                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-//                     : 'bg-blue-500 text-white hover:bg-blue-600'
-//                 }`}
-//               >
-//                 Next
-//               </button>
-//             </div>
-//           )}
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default TowRequestsPage
-
-
 
 "use client"
 import React, { useState, useEffect } from 'react';
@@ -198,7 +8,7 @@ import { ChevronDown, ChevronUp, X } from 'lucide-react';
 
 const DetailModal = ({ request, onClose }) => {
   if (!request) return null;
-
+  console.log("request",request)
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -276,7 +86,7 @@ const DetailModal = ({ request, onClose }) => {
                 {request.images.map((image, index) => (
                   <div key={index} className="relative">
                     <img 
-                      src="/api/placeholder/400/300"
+                      src={image.url}
                       alt={`Request image ${index + 1}`}
                       className="rounded-lg w-full h-48 object-cover"
                     />
@@ -436,7 +246,7 @@ const TowRequestsPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input
                 type="text"
-                placeholder="Search by username or email"
+                placeholder="Search by username"
                 value={filters.search}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -587,5 +397,4 @@ const TowRequestsPage = () => {
     </div>
   );
 };
-
 export default TowRequestsPage;

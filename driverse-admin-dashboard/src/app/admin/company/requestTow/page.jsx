@@ -135,8 +135,8 @@ export default function AdminCompanyRequestTow() {
     <div className="p-6">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-800">Towanic Requests</h1>
-        <p className="text-gray-600">Manage and monitor Towanic service requests</p>
+        <h1 className="text-2xl font-bold text-gray-800">Tow Requests</h1>
+        <p className="text-gray-600">Manage and monitor Tow service requests</p>
       </div>
 
       {/* Filters */}
@@ -186,7 +186,7 @@ export default function AdminCompanyRequestTow() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vehicle Info</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Location</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th> */}
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
@@ -220,7 +220,7 @@ export default function AdminCompanyRequestTow() {
                           <div className="flex-shrink-0 h-8 w-8">
                             <img
                               className="h-8 w-8 rounded-full"
-                              src={user.avatar?.url || '/placeholder-avatar.jpg'}
+                              src={user.avatar?.url || '/admin/user.png'}
                               alt=""
                             />
                           </div>
@@ -236,14 +236,14 @@ export default function AdminCompanyRequestTow() {
                         </div>
                       ))}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    {/* <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
                         ${request.status === 'completed' ? 'bg-green-100 text-green-800' : 
                           request.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 
                           'bg-gray-100 text-gray-800'}`}>
                         {request.status}
                       </span>
-                    </td>
+                    </td> */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {formatDate(request.createdAt)}
                     </td>

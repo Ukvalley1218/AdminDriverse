@@ -30,10 +30,7 @@ export async function POST(req) {
     try {
         const response = await fetch(apiUrl, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${process.env.API_KEY}`, // Add if required
-            },
+
             // Add body if needed
             // body: JSON.stringify({}),
         });
@@ -50,6 +47,7 @@ export async function POST(req) {
         }
 
         const data = await response.json();
+        console.log("data", data);
         return NextResponse.json(data, { status: 200 });
 
     } catch (error) {

@@ -2,7 +2,7 @@
 import Head from "next/head";
 import React, { useEffect, useState } from "react";
 import { FaPhoneAlt, FaUser, FaClock, FaFilter } from "react-icons/fa";
-
+import CallDetailsModal from "../Recoding/page";
 const AdminTalkToFriend = () => {
   const [callDetails, setCallDetails] = useState([]);
   const [statusCounts, setStatusCounts] = useState({});
@@ -12,6 +12,8 @@ const AdminTalkToFriend = () => {
     totalPages: 1,
     limit: 10,
   });
+  const [selectedCall, setSelectedCall] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
 
   // Filters
@@ -33,6 +35,9 @@ const AdminTalkToFriend = () => {
       const response = await fetch(query);
       const data = await response.json();
 
+      console.log("data", data);
+      console.log("data", data);
+
       if (data.success) {
         setCallDetails(data.paginatedLogs);
         setStatusCounts(data.statusCounts);
@@ -52,6 +57,12 @@ const AdminTalkToFriend = () => {
     }
   };
 
+  const handleViewDetails = (call) => {
+    setSelectedCall(call);
+    console.log("call", call);
+    setIsModalOpen(true);
+  };
+
   useEffect(() => {
     fetchCallDetails(pagination.currentPage, pagination.limit);
   }, [pagination.currentPage]);
@@ -65,7 +76,7 @@ const AdminTalkToFriend = () => {
       <Head>
         <title>Admin Dashboard - Talk to Friend</title>
       </Head>
-      <div className="container mx-auto p-4">
+      <div className="container mx-auto p-2">
         <h1 className="text-2xl font-bold mb-4">Talk to Friend - Call Details</h1>
 
         {/* Filters */}
@@ -104,9 +115,10 @@ const AdminTalkToFriend = () => {
 
           <button
             onClick={handleApplyFilters}
-            className="px-4 py-2 bg-black text-white rounded-lg flex items-center"
+            className="p-2 bg-black text-white rounded-xl flex items-center small"
+
           >
-            <FaFilter className="mr-2" /> Apply Filters
+            <FaFilter className=" mr-2" /> Apply Filters
           </button>
         </div>
 
@@ -125,19 +137,19 @@ const AdminTalkToFriend = () => {
 
         {/* Show Status Counts */}
         <div className="bg-gray-100 p-4 rounded-lg mb-4">
-          <h2 className="text-lg font-semibold mb-2">Call Status Counts</h2>
+          <h2 className="text-lg font-semibold mb-2  text-center mx-5">Call Status Counts</h2>
           <div className="grid grid-cols-2 gap-4">
-            <div className="bg-red-100 p-3 rounded-lg shadow-md">
-              <p className="text-sm font-medium text-red-600">Missed Calls</p>
-              <p className="text-xl font-bold">{statusCounts.missed || 0}</p>
+            <div className="bg-red-100 p-3 rounded-lg shadow-md mx-5">
+              <p className="text-sm font-medium text-red-600 text-center">Missed Calls</p>
+              <p className="text-xl text-center font-bold">{statusCounts.missed || 0}</p>
             </div>
-            <div className="bg-yellow-100 p-3 rounded-lg shadow-md">
-              <p className="text-sm font-medium text-yellow-600">Rejected Calls</p>
-              <p className="text-xl font-bold">{statusCounts.rejected || 0}</p>
+            <div className="bg-yellow-100 p-3 rounded-lg shadow-md mx-5">
+              <p className="text-sm font-medium text-yellow-600 text-center">Rejected Calls</p>
+              <p className="text-xl text-center font-bold">{statusCounts.rejected || 0}</p>
             </div>
-            <div className="bg-green-600 p-3 rounded-lg shadow-md">
-              <p className="text-sm font-medium text-gray-600">Connected Calls</p>
-              <p className="text-xl font-bold">{statusCounts.Connected || 0}</p>
+            <div className="bg-green-600 p-3 rounded-lg shadow-md mx-5">
+              <p className="text-sm font-medium text-gray-600 text-center">Connected Calls</p>
+              <p className="text-xl text-center font-bold">{statusCounts.completed || 0}</p>
             </div>
           </div>
         </div>
@@ -151,11 +163,12 @@ const AdminTalkToFriend = () => {
               <table className="w-full border-collapse border border-gray-200">
                 <thead className="bg-gray-100">
                   <tr className="text-left text-gray-700">
-                    <th className="p-3 border border-gray-300">Caller</th>
-                    <th className="p-3 border border-gray-300">Receiver</th>
-                    <th className="p-3 border border-gray-300">Status</th>
-                    <th className="p-3 border border-gray-300">Duration</th>
-             
+                    <th className="p-3 text-center border border-gray-300">Caller</th>
+                    <th className="p-3 text-center border border-gray-300">Receiver</th>
+                    <th className="p-3 text-center border border-gray-300">Status</th>
+                    <th className="p-3 text-center border border-gray-300">Duration</th>
+                    <th className="p-3 text-center border border-gray-300">Action</th>
+
                   </tr>
                 </thead>
                 <tbody>
@@ -179,20 +192,20 @@ const AdminTalkToFriend = () => {
                           </div>
                         </td>
                         <td className="p-2 border border-gray-300 text-center">
-                          
+
                           {call.status}
                         </td>
                         <td className="p-2 border border-gray-300 text-center">
                           {call.formattedDuration}
                         </td>
-                        {/* <td className="p-3 border border-gray-300 text-center">
+                        <td className="p-2 border border-gray-300 text-center">
                           <button
+                            onClick={() => handleViewDetails(call)}
                             className="px-4 py-1 bg-blue-600 text-white rounded-md shadow-md hover:bg-blue-700 transition duration-300"
-                            onClick={() => setUserId(call._id)}
                           >
-                            Get User ID
+                            View Details
                           </button>
-                        </td> */}
+                        </td>
                       </tr>
                     ))
                   ) : (
@@ -229,6 +242,12 @@ const AdminTalkToFriend = () => {
             Next
           </button>
         </div>
+
+        <CallDetailsModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          callData={selectedCall}
+        />
       </div>
     </>
   );

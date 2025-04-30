@@ -274,7 +274,7 @@ export default function VehicleManagement() {
                                                     <div className="flex-shrink-0 h-8 w-8">
                                                         <img
                                                             className="h-8 w-8 rounded-full"
-                                                            src={vehicle.user.avatar?.url || '/placeholder-avatar.jpg'}
+                                                            src={vehicle.user.avatar?.url || '/admin/user.png'}
                                                             alt=""
                                                         />
                                                     </div>

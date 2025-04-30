@@ -3,7 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import Admin from "../../../lib/AdminModal";
 import { connectToDb } from "../../../lib/db";
 
-export const authOptions = {
+export  const authOptions = {
   pages: {
     signIn: "/login",
   },
