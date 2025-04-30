@@ -45,6 +45,7 @@ Tundra,Toyota,2019`;
             }
 
             const data = await response.json();
+            console.log('Truck data:', data);
             setTrucks(data.data || []);
             setTotalPages(data.pagination?.totalPages || 1);
         } catch (error) {
@@ -151,7 +152,7 @@ Tundra,Toyota,2019`;
 
     const handleEdit = (truck) => {
         setFormData({
-            model: truck.model,
+            model: truck.modal,
             make: truck.make,
             year: truck.year
         });
@@ -546,7 +547,7 @@ Tundra,Toyota,2019`;
                                                                     <MoveVertical size={16} className="text-gray-500" />
                                                                 </div>
                                                             </td>
-                                                            <td className="py-3 px-4">{truck.model}</td>
+                                                            <td className="py-3 px-4">{truck.modal}</td>
                                                             <td className="py-3 px-4">{truck.make}</td>
                                                             <td className="py-3 px-4">{truck.year}</td>
                                                             <td className="py-3 px-2 text-right">

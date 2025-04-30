@@ -89,7 +89,7 @@ export async function POST(request) {
                 }
 
                 // Check if truck exists
-                const existingTruck = await truck_details.findOne({ modal:model, make, year: parseInt(year) });
+                const existingTruck = await truck_details.findOne({ modal: model, make, year: parseInt(year) });
 
                 if (!existingTruck) {
                     const newTruck = new truck_details({
@@ -104,10 +104,10 @@ export async function POST(request) {
             }
 
             return NextResponse.json(
-                { 
-                    message: "CSV processed successfully", 
+                {
+                    message: "CSV processed successfully",
                     imported: importedCount,
-                    results 
+                    results
                 },
                 { status: 200 }
             );
@@ -124,7 +124,7 @@ export async function POST(request) {
             );
         }
 
-        const newTruck = new truck_details({ modal:model, make, year: parseInt(year) });
+        const newTruck = new truck_details({ modal: model, make, year: parseInt(year) });
         await newTruck.save();
 
         return NextResponse.json(
@@ -143,7 +143,7 @@ export async function POST(request) {
 export async function PUT(request) {
     try {
         await connectToDb();
-        const { id, ...updateData } = await request.json();
+        const { id, model, make, year } = await request.json();
 
         if (!id) {
             return NextResponse.json(
@@ -154,7 +154,11 @@ export async function PUT(request) {
 
         const updatedTruck = await truck_details.findByIdAndUpdate(
             id,
-            updateData,
+            {
+                modal: model,  // Map frontend's 'model' to schema's 'modal'
+                make,
+                year
+            },
             { new: true }
         );
 
