@@ -1,61 +1,73 @@
-import { NextResponse } from 'next/server';
+import { NextResponse } from "next/server";
+import { connectToDb } from "@/app/lib/db";
+import AgentKYCDocument from "@/app/lib/AgentkycDocument";
+import mongoose from "mongoose";
+import User from "@/app/lib/User";
 
-export async function GET(req) {
+export async function GET(request) {
   try {
-    // Extract query parameters from the request
-    const { searchParams } = new URL(req.url);
+    await connectToDb();
+
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = parseInt(searchParams.get('limit') || '10');
     const search = searchParams.get('search') || '';
-    const fromDate = searchParams.get('fromDate');
-    const toDate = searchParams.get('toDate');
-    const page = searchParams.get('page') || '1';
-    const limit = searchParams.get('limit') || '10';
+    const fromDate = searchParams.get('fromDate') || '';
+    const toDate = searchParams.get('toDate') || '';
 
-    // Construct the API URL with query parameters
-    const apiUrl = new URL(`${process.env.NEXT_PUBLIC_API_BASE_URL}/Agent_getAllVerifiedKYC`);
-    
-    // Add query parameters to the API URL
-    if (search) apiUrl.searchParams.append('search', search);
-    if (fromDate) apiUrl.searchParams.append('fromDate', fromDate);
-    if (toDate) apiUrl.searchParams.append('toDate', toDate);
-    apiUrl.searchParams.append('page', page);
-    apiUrl.searchParams.append('limit', limit);
+    let query = {
+      overallStatus: { $in: ['approved', 'partially_approved'] }
+    };
 
-    console.log(`Fetching verified KYC data from: ${apiUrl.toString()}`);
-
-    const response = await fetch(apiUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      next: { revalidate: 60 } // Cache the response for 60 seconds
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`API Error: ${response.status} - ${errorText}`);
-      throw new Error(`API request failed with status ${response.status}`);
+    // Search by user email (assuming userId is populated)
+    if (search) {
+      query['$or'] = [
+        { 'userId.email': { $regex: search, $options: 'i' } },
+        { 'userId.name': { $regex: search, $options: 'i' } }
+      ];
     }
 
-    const data = await response.json();
-
-    // Validate the response structure
-    if (!data || typeof data !== 'object') {
-      throw new Error('Invalid response format from API');
+    // Date range filter
+    if (fromDate || toDate) {
+      query.lastVerifiedAt = {};
+      if (fromDate) query.lastVerifiedAt.$gte = new Date(fromDate);
+      if (toDate) query.lastVerifiedAt.$lte = new Date(toDate);
     }
 
-    console.log('Successfully fetched KYC data');
+    const total = await AgentKYCDocument.countDocuments(query);
+
+    const documents = await AgentKYCDocument.find(query)
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .populate('userId', 'username email')
+      .sort({ lastVerifiedAt: -1 })
+      .lean();
+
+    // Transform data for the frontend
+    const transformedData = documents.map(doc => ({
+      _id: doc._id,
+      username: doc.userId?.name || 'N/A',
+      email: doc.userId?.email || 'N/A',
+      country: doc.country,
+      overallStatus: doc.overallStatus,
+      lastVerifiedAt: doc.lastVerifiedAt,
+      documents: doc.documents
+    }));
+
     return NextResponse.json({
       success: true,
-      data: data
+      data: transformedData,
+      totalRecords: total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: page,
+      limit: limit
     });
 
   } catch (error) {
-    console.error('Error in GET /api/kyc:', error.message);
-    return NextResponse.json({
-      success: false,
-      error: error.message || 'Failed to fetch verified KYC data'
-    }, {
-      status: 500
-    });
+    console.error('Error fetching verified documents:', error);
+    return NextResponse.json(
+      { success: false, message: error.message },
+      { status: 500 }
+    );
   }
 }

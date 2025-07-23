@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const truckDetailsSchema = new mongoose.Schema({
+const TruckSchema = new mongoose.Schema({
     modal: {
         type: String,
         required: true,
@@ -25,8 +25,8 @@ const truckDetailsSchema = new mongoose.Schema({
 });
 
 
-const truck_details = mongoose.models.truck_details || mongoose.model('truck_details', truckDetailsSchema);
+const Truck = mongoose.models.Truck || mongoose.model('Truck', TruckSchema);
 
 
-export default truck_details;
+export default Truck;
 

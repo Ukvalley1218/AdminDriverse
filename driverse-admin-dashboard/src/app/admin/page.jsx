@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import Head from "next/head";
-import { FaBell, FaCrown, FaSearch, FaUsers, FaDownload } from "react-icons/fa";
+import { FaDownload, FaUsers } from "react-icons/fa";
 import CountUp from "react-countup";
 import Chart from "chart.js/auto";
 
@@ -15,10 +15,7 @@ const AdminDashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [timeFrame, setTimeFrame] = useState("allTime");
-  const [dateRange, setDateRange] = useState({
-    startDate: "",
-    endDate: ""
-  });
+  const [dateRange, setDateRange] = useState({ startDate: "", endDate: "" });
 
   const fetchStats = async (timeFrame, startDate, endDate) => {
     try {
@@ -32,7 +29,7 @@ const AdminDashboard = () => {
 
       if (statsData.success) {
         setUserStats(statsData.data);
-        setTotalAmount(statsData.globalTotalAmountReceived);
+        setTotalAmount(statsData.globalTotal?.totalAmount || 0);
       }
     } catch (error) {
       console.error("Error fetching stats:", error);
@@ -46,9 +43,11 @@ const AdminDashboard = () => {
       );
       const subscriptionsData = await subscriptionsResponse.json();
 
+
+      console.log("subscriptionsData", subscriptionsData);
       if (subscriptionsData.success) {
         setRecentSubscriptions(subscriptionsData.data);
-        setTotalPages(subscriptionsData.pagination.totalPages);
+        setTotalPages(subscriptionsData.pagination?.totalPages || 1);
       }
     } catch (error) {
       console.error("Error fetching subscriptions:", error);
@@ -71,30 +70,62 @@ const AdminDashboard = () => {
     }
 
     const labels = userStats.map((stat) => stat.serviceType);
-    const dataValues = userStats.map((stat) => stat.totalCount);
+    const userCounts = userStats.map((stat) => stat.userCount);
+    const transactionAmounts = userStats.map((stat) => stat.transactionStats.totalAmountReceived);
 
     myChart.current = new Chart(ctx, {
-      type: "doughnut",
+      type: "bar",
       data: {
         labels,
         datasets: [
           {
-            data: dataValues,
-            backgroundColor: ["yellow", "orange", "green", "skyblue", "red"],
-            hoverBackgroundColor: ["#FFD700", "#FF8C00", "#32CD32", "#87CEEB", "#FF6347"],
+            label: "User Count",
+            data: userCounts,
+            backgroundColor: "rgba(59, 130, 246, 0.5)",
+            borderColor: "rgba(59, 130, 246, 1)",
+            borderWidth: 1,
+          },
+          {
+            label: "Transaction Amount ($)",
+            data: transactionAmounts,
+            backgroundColor: "rgba(16, 185, 129, 0.5)",
+            borderColor: "rgba(16, 185, 129, 1)",
+            borderWidth: 1,
           },
         ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: "Values" },
+          },
+          x: {
+            title: { display: true, text: "Service Type" },
+          },
+        },
         plugins: {
-          legend: {
-            position: "right",
+          legend: { position: "top" },
+          tooltip: {
+            callbacks: {
+              label: (context) => {
+                const label = context.dataset.label || "";
+                const value = context.raw;
+                return `${label}: ${label.includes("Amount") ? formatCurrency(value) : value}`;
+              },
+            },
           },
         },
       },
     });
+
+    return () => {
+      if (myChart.current) {
+        myChart.current.destroy();
+      }
+    };
   }, [userStats]);
 
   const handlePageChange = (newPage) => {
@@ -113,79 +144,83 @@ const AdminDashboard = () => {
 
   const handleDateChange = (e) => {
     const { name, value } = e.target;
-    setDateRange(prev => ({ ...prev, [name]: value }));
+    setDateRange((prev) => ({ ...prev, [name]: value }));
   };
+
   const handleDownloadCSV = async () => {
     try {
-      // Construct the URL with parameters
       const params = new URLSearchParams();
-      params.append('timeFrame', timeFrame);
-      params.append('download', 'true');
+      params.append("timeFrame", timeFrame);
+      params.append("download", "true");
 
       if (timeFrame === "custom" && dateRange.startDate && dateRange.endDate) {
-        params.append('startDate', dateRange.startDate);
-        params.append('endDate', dateRange.endDate);
+        params.append("startDate", dateRange.startDate);
+        params.append("endDate", dateRange.endDate);
       }
 
       const url = `/api/getUserStatsAndRecentSubscriptions?${params.toString()}`;
-
-      // Fetch the data
       const response = await fetch(url);
-      console.log("Response:", response); // Debugging line
 
-      // Check if the response is successful
       if (!response.ok) {
         throw new Error(`Failed to download: ${response.statusText}`);
       }
 
-      // Get the filename from Content-Disposition header or generate one
-      const contentDisposition = response.headers.get('Content-Disposition');
+      const contentDisposition = response.headers.get("Content-Disposition");
       let filename = `subscription-stats-${timeFrame}-${new Date().toISOString().slice(0, 10)}.csv`;
 
       if (contentDisposition) {
         const filenameMatch = contentDisposition.match(/filename="?(.+)"?/);
         if (filenameMatch && filenameMatch[1]) {
-          filename = filenameMatch[1];
+          filename = filenameMatch  [1];
         }
       }
 
-      // Create blob from response
       const blob = await response.blob();
-
-      // Create download link
       const downloadUrl = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = downloadUrl;
       link.download = filename;
-      link.style.display = 'none';
-
-      // Trigger download
       document.body.appendChild(link);
       link.click();
-
-      // Clean up
-      setTimeout(() => {
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(downloadUrl);
-      }, 100);
-
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error("Error downloading CSV:", error);
-      // Add user notification here if needed
-      alert('Failed to download CSV. Please try again.');
+      alert("Failed to download CSV. Please try again.");
     }
   };
 
+  const formatCurrency = (amount, currency = "USD") => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 2,
+    }).format(amount);
+  };
+
+  const formatCurrency1 = (amount, currency = "USD") => {
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 2,
+    }).format(amount / 100);
+  };
+
+
   return (
-    <div className="h-full">
+    <div className="min-h-screen bg-gray-50 p-6">
+      <Head>
+        <title>Admin Dashboard</title>
+      </Head>
+
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row items-center content-start justify-between mb-4">
-        <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold">Dashboard</h1>
-        <div className="flex items-center gap-x-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
+        <h1 className="text-3xl font-semibold text-gray-800">Admin Dashboard</h1>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-4 sm:mt-0">
           <select
             value={timeFrame}
             onChange={handleTimeFrameChange}
-            className="p-2 border rounded"
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             <option value="allTime">All Time</option>
             <option value="lastWeek">Last Week</option>
@@ -201,96 +236,121 @@ const AdminDashboard = () => {
                 name="startDate"
                 value={dateRange.startDate}
                 onChange={handleDateChange}
-                className="p-2 border rounded"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <input
                 type="date"
                 name="endDate"
                 value={dateRange.endDate}
                 onChange={handleDateChange}
-                className="p-2 border rounded"
+                className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           )}
 
           <button
             onClick={handleDownloadCSV}
-            className="flex items-center gap-2 bg-black text-white px-4 py-2 rounded hover:bg-black/80 transition duration-200"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
           >
-            <FaDownload /> Export
+            <FaDownload /> Export CSV
           </button>
         </div>
       </div>
 
-      {/* Count Section */}
-      <div className="bg-slate-100 p-4 rounded-lg">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {userStats.map((stat, index) => (
-            <div key={index} className="flex items-center p-4 rounded-2xl bg-white shadow-lg">
-              <div className="flex items-center justify-center w-12 h-12 rounded-full text-blue-500 bg-blue-100">
-                <FaUsers size={24} />
-              </div>
-              <div className="ml-4">
-                <h2 className="text-lg font-bold text-slate-700">{stat.serviceType}</h2>
-                <p className="text-base text-slate-800 font-semibold">
-                  <CountUp end={stat.totalCount} duration={1} />
-                </p>
-              </div>
-            </div>
-          ))}
-          <div className="flex items-center p-4 rounded-2xl bg-white shadow-lg">
-            <div className="flex items-center justify-center w-12 h-12 rounded-full text-purple-500 bg-purple-100">
-              <FaCrown size={24} />
+      {/* Stats Section */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {userStats.map((stat, index) => (
+          <div
+            key={index}
+            className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex items-center"
+          >
+            <div className="p-3 bg-blue-100 rounded-full">
+              <FaUsers className="text-blue-600" size={24} />
             </div>
             <div className="ml-4">
-              <h2 className="text-lg font-bold text-slate-700">Total Revenue</h2>
-              <p className="text-base text-slate-800 font-semibold">
-                Rs. <CountUp end={totalAmount} duration={1} />
+              <h3 className="text-sm font-medium text-gray-600 capitalize">{stat.serviceType}</h3>
+              <p className="text-lg font-semibold text-gray-800">
+                <CountUp end={stat.userCount} duration={1} /> Users
+              </p>
+              <p className="text-sm text-gray-500">
+                Transactions: {formatCurrency(stat.transactionStats.totalAmountReceived)}
               </p>
             </div>
+          </div>
+        ))}
+        <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100 flex items-center">
+          <div className="p-3 bg-green-100 rounded-full">
+            <FaUsers className="text-green-600" size={24} />
+          </div>
+          <div className="ml-4">
+            <h3 className="text-sm font-medium text-gray-600">Total Revenue</h3>
+            <p className="text-lg font-semibold text-gray-800">
+              <CountUp end={totalAmount} duration={1} decimals={2} prefix="$" />
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Recent Premiums and Chart */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-6">
-        {/* Doughnut Chart Section */}
-        <div className="shadow-lg p-4 rounded-lg">
-          <h1 className="text-lg font-bold">Service Distribution</h1>
-          <div className="h-64">
+      {/* Chart and Subscriptions Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Chart Section */}
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Service Distribution</h2>
+          <div className="h-80">
             <canvas ref={chartRef} />
           </div>
         </div>
 
         {/* Recent Subscriptions Section */}
-        <div className="shadow-lg p-4 rounded-lg">
-          <h1 className="text-lg font-bold">Recent Subscriptions</h1>
+        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Recent Transactions</h2>
           <div className="space-y-4">
             {recentSubscriptions.map((subscription, index) => (
-              <div key={index} className="p-4 bg-white shadow rounded-lg">
-                <h2 className="text-slate-700 capitalize">UserName: {subscription.username}</h2>
-                <p className="text-sm text-slate-500">Email: {subscription.email}</p>
-                <p className="text-sm text-slate-500">Amount: {subscription.subscriptionDetails.amountReceived}</p>
-                <p className="text-sm text-slate-500">
-                  Date: {new Date(subscription.subscriptionDetails.paymentDate).toLocaleDateString()}
-                </p>
+              <div key={index} className="p-4 bg-gray-50 rounded-md">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-sm font-medium text-gray-700">
+                      {subscription.username || "N/A"}
+                    </h3>
+                    <p className="text-xs text-gray-500">Status: {subscription.subscriptionDetails.status}</p>
+                    <p className="text-xs text-gray-500 capitalize">
+                      {subscription.serviceType || "N/A"}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-medium text-green-600">
+                      {formatCurrency1(subscription.subscriptionDetails.amount || 0)}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {subscription.subscriptionDetails.paymentDate
+                        ? new Date(subscription.subscriptionDetails.paymentDate).toLocaleDateString()
+                        : "N/A"}
+                    </p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
           {totalPages > 1 && (
             <div className="flex justify-between items-center mt-4">
               <button
-                className={`px-4 py-2 rounded ${currentPage === 1 ? 'bg-gray-300 cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-300'}`}
+                className={`px-4 py-2 rounded-md ${currentPage === 1
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+                  }`}
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
               >
                 Previous
               </button>
-              <p>
+              <p className="text-sm text-gray-600">
                 Page {currentPage} of {totalPages}
               </p>
               <button
-                className={`px-4 py-2 rounded ${currentPage === totalPages ? 'bg-gray-300 cursor-not-allowed' : 'bg-gray-200 hover:bg-gray-300'}`}
+                className={`px-4 py-2 rounded-md ${currentPage === totalPages
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700"
+                  }`}
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
               >

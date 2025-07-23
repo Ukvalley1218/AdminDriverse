@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectToDb } from "../../lib/db"
-import truck_details from "../../lib/truck_details"
+import Truck from "@/app/lib/Truck";
 import csv from 'csv-parser';
 import { Readable } from 'stream';
 
@@ -13,7 +13,10 @@ const processCSV = async (fileData) => {
     return new Promise((resolve, reject) => {
         stream
             .pipe(csv())
-            .on('data', (data) => results.push(data))
+            .on('data', (data) => {
+                console.log("CSV Row:", data); // 🚨 Debug log
+                results.push(data);
+            })
             .on('end', () => resolve(results))
             .on('error', (error) => reject(error));
     });
@@ -30,8 +33,8 @@ export async function GET(request) {
         const limit = parseInt(searchParams.get('limit')) || 5;
         const skip = (page - 1) * limit;
 
-        const total = await truck_details.countDocuments({});
-        const trucks = await truck_details.find({})
+        const total = await Truck.countDocuments({});
+        const trucks = await Truck.find({})
             .skip(skip)
             .limit(limit)
             .exec();
@@ -82,19 +85,20 @@ export async function POST(request) {
             const results = [];
 
             for (const truckData of trucksData) {
-                const { model, make, year } = truckData;
+                const { model, make, category, year } = truckData;
 
-                if (!model || !make || !year) {
+                if (!model || !make || !category || !year) {
                     continue;
                 }
 
                 // Check if truck exists
-                const existingTruck = await truck_details.findOne({ modal: model, make, year: parseInt(year) });
+                const existingTruck = await Truck.findOne({ modal: model, category, make, year: parseInt(year) });
 
                 if (!existingTruck) {
-                    const newTruck = new truck_details({
+                    const newTruck = new Truck({
                         modal: model,
                         make,
+                        category,
                         year: parseInt(year)
                     });
                     await newTruck.save();
@@ -115,16 +119,16 @@ export async function POST(request) {
 
         // Handle regular JSON truck creation
         const jsonData = await request.json();
-        const { model, make, year } = jsonData;
+        const { model, make, category, year } = jsonData;
 
-        if (!model || !make || !year) {
+        if (!model || !make || !category || !year) {
             return NextResponse.json(
-                { message: "Model, make, and year are required" },
+                { message: "Model, make,category, and year are required" },
                 { status: 400 }
             );
         }
 
-        const newTruck = new truck_details({ modal: model, make, year: parseInt(year) });
+        const newTruck = new Truck({ modal: model, category, make, year: parseInt(year) });
         await newTruck.save();
 
         return NextResponse.json(
@@ -143,7 +147,7 @@ export async function POST(request) {
 export async function PUT(request) {
     try {
         await connectToDb();
-        const { id, model, make, year } = await request.json();
+        const { id, model, category, make, year } = await request.json();
 
         if (!id) {
             return NextResponse.json(
@@ -152,11 +156,12 @@ export async function PUT(request) {
             );
         }
 
-        const updatedTruck = await truck_details.findByIdAndUpdate(
+        const updatedTruck = await Truck.findByIdAndUpdate(
             id,
             {
                 modal: model,  // Map frontend's 'model' to schema's 'modal'
                 make,
+                category,
                 year
             },
             { new: true }
@@ -194,7 +199,7 @@ export async function DELETE(request) {
             );
         }
 
-        const deletedTruck = await truck_details.findByIdAndDelete(id);
+        const deletedTruck = await Truck.findByIdAndDelete(id);
 
         if (!deletedTruck) {
             return NextResponse.json(

@@ -11,6 +11,7 @@ export default function TruckDetailsPage() {
     const [formData, setFormData] = useState({
         model: '',
         make: '',
+        category: '',
         year: ''
     });
     const [editId, setEditId] = useState(null);
@@ -23,12 +24,12 @@ export default function TruckDetailsPage() {
     const fileInputRef = useRef(null);
 
     // Sample CSV data
-    const sampleCSV = `model,make,year
-F-150,Ford,2022
-Silverado,Chevrolet,2021
-Ram 1500,Dodge,2023
-Sierra,GMC,2020
-Tundra,Toyota,2019`;
+    const sampleCSV = `model,make,category,year
+F-150,Ford,truk,2022
+Silverado,Chevrolet,truk,2021
+Ram 1500,Dodge,truk,2023
+Sierra,GMC,truk,2020
+Tundra,Toyota,truk,2019`;
 
     // Fetch all trucks on component mount or when page changes
     useEffect(() => {
@@ -71,11 +72,11 @@ Tundra,Toyota,2019`;
         e.preventDefault();
 
         // Form validation
-        if (!formData.model || !formData.make || !formData.year) {
+        if (!formData.model || !formData.make || !formData.category || !formData.year) {
             showMessage('Please fill in all required fields', 'error');
             return;
         }
-        console.log(formData.model, formData.make, formData.year)
+        console.log(formData.model, formData.make, formData.category, formData.year)
 
         if (formData.year < 1900 || formData.year > new Date().getFullYear() + 1) {
             showMessage('Please enter a valid year between 1900 and ' + (new Date().getFullYear() + 1), 'error');
@@ -101,7 +102,7 @@ Tundra,Toyota,2019`;
             }
 
             console.log('Truck response:', response.data);
-            setFormData({ model: '', make: '', year: '' });
+            setFormData({ model: '', category: '', make: '', year: '' });
             setEditId(null);
             fetchTrucks();
         } catch (error) {
@@ -154,6 +155,7 @@ Tundra,Toyota,2019`;
         setFormData({
             model: truck.modal,
             make: truck.make,
+            category: truck.category,
             year: truck.year
         });
         setEditId(truck._id);
@@ -390,6 +392,21 @@ Tundra,Toyota,2019`;
                             />
                         </div>
                         <div>
+                            <label className="block text-gray-700 mb-2 font-medium" htmlFor="make">
+                                category <span className="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                id="category"
+                                name="category"
+                                value={formData.category}
+                                onChange={handleChange}
+                                className="w-full px-3 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                required
+                                placeholder="E.g. Truk/ Trailer"
+                            />
+                        </div>
+                        <div>
                             <label className="block text-gray-700 mb-2 font-medium" htmlFor="year">
                                 Year <span className="text-red-500">*</span>
                             </label>
@@ -428,7 +445,7 @@ Tundra,Toyota,2019`;
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        setFormData({ model: '', make: '', year: '' });
+                                        setFormData({ model: '', category: '', make: '', year: '' });
                                         setEditId(null);
                                     }}
                                     className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition duration-200"
@@ -520,6 +537,7 @@ Tundra,Toyota,2019`;
                                                 <th className="py-3 px-4 text-left w-16">#</th>
                                                 <th className="py-3 px-4 text-left">Model</th>
                                                 <th className="py-3 px-4 text-left">Make</th>
+                                                <th className="py-3 px-4 text-left">Category</th>
                                                 <th className="py-3 px-4 text-left">Year</th>
                                                 <th className="py-3 px-4 text-right">Actions</th>
                                             </tr>
@@ -549,6 +567,7 @@ Tundra,Toyota,2019`;
                                                             </td>
                                                             <td className="py-3 px-4">{truck.modal}</td>
                                                             <td className="py-3 px-4">{truck.make}</td>
+                                                            <td className="py-3 px-4">{truck.category}</td>
                                                             <td className="py-3 px-4">{truck.year}</td>
                                                             <td className="py-3 px-2 text-right">
                                                                 <button

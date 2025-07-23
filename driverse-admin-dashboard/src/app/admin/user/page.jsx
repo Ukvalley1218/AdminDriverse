@@ -15,7 +15,6 @@ import {
   FaCheck,
   FaBan,
   FaClock,
-  X
 } from "react-icons/fa";
 import { LuDownload } from "react-icons/lu";
 import { FiUser } from "react-icons/fi";
@@ -26,6 +25,7 @@ import autoTable from "jspdf-autotable";
 import { Bell, DollarSign, NotebookPenIcon } from "lucide-react";
 import AnalyticsModal from "../Anlytic/page ";
 import CallRecoding from "../AgentRecoding/page";
+
 // UserModal Component
 const UserModal = ({
   isOpen,
@@ -42,7 +42,6 @@ const UserModal = ({
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
       <div className="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto mx-4">
-        {/* Modal Header */}
         <div className="flex justify-between items-center p-6 border-b">
           <div className="flex items-center gap-3">
             <FaUser className="text-3xl text-gray-700" />
@@ -58,7 +57,6 @@ const UserModal = ({
           </button>
         </div>
 
-        {/* Modal Body */}
         <div className="p-6">
           {isEditing ? (
             <div className="space-y-4">
@@ -199,11 +197,9 @@ const UserModal = ({
           )}
         </div>
 
-        {/* Modal Footer */}
         <div className="flex justify-end gap-3 p-6 border-t bg-gray-50">
           {isEditing ? (
             <>
-            
               <button
                 onClick={onUpdate}
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -226,14 +222,11 @@ const UserModal = ({
   );
 };
 
-
-
-//Notification
+// NotificationModal Component
 const NotificationModal = ({ isOpen, onClose, user }) => {
   const [formData, setFormData] = useState({
     title: '',
     body: ''
-
   })
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -263,7 +256,6 @@ const NotificationModal = ({ isOpen, onClose, user }) => {
       }
 
       onClose();
-      // You might want to refresh the user data here
     } catch (err) {
       setError(err.message);
     } finally {
@@ -276,7 +268,6 @@ const NotificationModal = ({ isOpen, onClose, user }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
       <div className="bg-white rounded-lg w-full max-w-md mx-4">
-        {/* Modal Header */}
         <div className="flex justify-between items-center p-6 border-b">
           <div className="flex items-center gap-3">
             <Bell className="text-2xl text-gray-700" />
@@ -292,7 +283,6 @@ const NotificationModal = ({ isOpen, onClose, user }) => {
           </button>
         </div>
 
-        {/* Modal Body */}
         <form onSubmit={handleSubmit} className="p-6">
           {error && (
             <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg">
@@ -326,13 +316,8 @@ const NotificationModal = ({ isOpen, onClose, user }) => {
                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
-
-
-
-
           </div>
 
-          {/* Footer */}
           <div className="mt-6 flex justify-end gap-3">
             <button
               type="button"
@@ -354,8 +339,6 @@ const NotificationModal = ({ isOpen, onClose, user }) => {
       </div>
     </div>
   );
-
-
 };
 
 // SubscriptionModal Component
@@ -394,7 +377,6 @@ const SubscriptionModal = ({ isOpen, onClose, user }) => {
       }
 
       onClose();
-      // You might want to refresh the user data here
     } catch (err) {
       setError(err.message);
     } finally {
@@ -407,7 +389,6 @@ const SubscriptionModal = ({ isOpen, onClose, user }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
       <div className="bg-white rounded-lg w-full max-w-md mx-4">
-        {/* Modal Header */}
         <div className="flex justify-between items-center p-6 border-b">
           <div className="flex items-center gap-3">
             <DollarSign className="text-2xl text-gray-700" />
@@ -423,7 +404,6 @@ const SubscriptionModal = ({ isOpen, onClose, user }) => {
           </button>
         </div>
 
-        {/* Modal Body */}
         <form onSubmit={handleSubmit} className="p-6">
           {error && (
             <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg">
@@ -490,7 +470,6 @@ const SubscriptionModal = ({ isOpen, onClose, user }) => {
             </div>
           </div>
 
-          {/* Footer */}
           <div className="mt-6 flex justify-end gap-3">
             <button
               type="button"
@@ -514,6 +493,149 @@ const SubscriptionModal = ({ isOpen, onClose, user }) => {
   );
 };
 
+// TalkTimeRechargeModal Component
+const TalkTimeRechargeModal = ({ isOpen, onClose, userId, onRechargeSuccess }) => {
+  const [plans, setPlans] = useState([]);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchPlans();
+    }
+  }, [isOpen]);
+
+  const fetchPlans = async () => {
+    try {
+      const response = await axios.get('/api/recharge');
+      setPlans(response.data);
+    } catch (err) {
+      console.error("Error fetching plans:", err);
+      setError('Failed to load plans');
+    }
+  };
+
+  const handleRecharge = async () => {
+    if (!selectedPlan) {
+      setError('Please select a plan');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    setSuccess('');
+
+    try {
+      const response = await axios.post('/api/recharge', {
+        userId,
+        planid: selectedPlan._id,
+        state: "completed"
+      });
+
+      setSuccess('Recharge successful!');
+      if (onRechargeSuccess) {
+        onRechargeSuccess();
+      }
+    } catch (err) {
+      console.error("Error recharging:", err);
+      setError(err.response?.data?.error || 'Failed to process recharge');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+      <div className="bg-white rounded-lg w-full max-w-md mx-4">
+        <div className="flex justify-between items-center p-6 border-b">
+          <div className="flex items-center gap-3">
+            <DollarSign className="text-2xl text-gray-700" />
+            <h2 className="text-2xl font-bold text-gray-800">
+              Talk Time Recharge
+            </h2>
+          </div>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 transition-colors"
+          >
+            <IoMdClose size={24} />
+          </button>
+        </div>
+
+        <div className="p-6">
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 text-red-600 rounded-lg">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="mb-4 p-3 bg-green-50 text-green-600 rounded-lg">
+              {success}
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Select a Plan
+              </label>
+              <div className="grid grid-cols-1 gap-3">
+                {plans.map((plan) => (
+                  <div
+                    key={plan._id}
+                    className={`p-4 border rounded-lg cursor-pointer transition-colors ${
+                      selectedPlan?._id === plan._id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-300 hover:bg-gray-50'
+                    }`}
+                    onClick={() => setSelectedPlan(plan)}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h3 className="font-medium">{plan.hours} Hours</h3>
+                        <p className="text-sm text-gray-600">
+                          ${plan.price} - ${plan.costPerHour}/hour
+                        </p>
+                      </div>
+                      <div className="text-lg font-bold">
+                        ${plan.price}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-6 flex justify-end gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleRecharge}
+              disabled={loading || !selectedPlan}
+              className={`px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors ${
+                loading || !selectedPlan ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
+            >
+              {loading ? 'Processing...' : 'Recharge'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 // Main AdminUser Component
 const AdminUser = () => {
   const [users, setUsers] = useState([]);
@@ -526,18 +648,14 @@ const AdminUser = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [editedUser, setEditedUser] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  // const [selectedServiceType, setSelectedServiceType] = useState("");
   const [selectedServiceType, setSelectedServiceType] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  // Add these at the top with other state declarations
   const [isAnalyticsModalOpen, setIsAnalyticsModalOpen] = useState(false);
-
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
-
   const [isReocdingModalOpen, setIsReocdingModalOpen] = useState(false);
-
   const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
-  // Fetch users data
+  const [isRechargeModalOpen, setIsRechargeModalOpen] = useState(false);
+
   const serviceType = ["Driver", "Company", "Agent", "Tower", "Mechanic"];
 
   const fetchData = async () => {
@@ -548,12 +666,11 @@ const AdminUser = () => {
           startDate: startDate || undefined,
           endDate: endDate || undefined,
           page: page || 1,
-          serviceType: selectedServiceType.length ? selectedServiceType.join(",") : undefined, // Convert array to comma-separated string
+          serviceType: selectedServiceType.length ? selectedServiceType.join(",") : undefined,
         },
       });
 
       setUsers(response.data.data || []);
-      console.log("Resposn", response.data);
       setTotalPages(response.data.pagination.totalPages || 1);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -563,10 +680,7 @@ const AdminUser = () => {
   useEffect(() => {
     fetchData();
   }, [searchQuery, startDate, endDate, page, selectedServiceType]);
-  // Added selectedServiceType as a dependency
 
-
-  // Fetch single user data
   const fetchUserDetails = async (userId) => {
     try {
       const response = await axios.get(`/api/guser/${userId}`);
@@ -577,11 +691,6 @@ const AdminUser = () => {
     }
   };
 
-
-
-
-
-  // Update user
   const updateUser = async () => {
     try {
       const response = await axios.put(
@@ -590,15 +699,12 @@ const AdminUser = () => {
       );
       setSelectedUser(response.data);
       setIsEditing(false);
-      fetchData(); // Refresh the list
-      // Optional: Show success message
+      fetchData();
     } catch (error) {
       console.error("Error updating user:", error);
-      // Optional: Show error message
     }
   };
 
-  // Delete user
   const deleteUser = async (userId) => {
     if (!confirm("Are you sure you want to delete this user?")) return;
 
@@ -608,15 +714,12 @@ const AdminUser = () => {
         setSelectedUser(null);
         setIsModalOpen(false);
       }
-      fetchData(); // Refresh the list
-      // Optional: Show success message
+      fetchData();
     } catch (error) {
       console.error("Error deleting user:", error);
-      // Optional: Show error message
     }
   };
 
-  // Generate and download PDF
   const handleDownload = () => {
     const doc = new jsPDF();
     autoTable(doc, {
@@ -645,6 +748,9 @@ const AdminUser = () => {
     );
   };
 
+  const handleRechargeSuccess = () => {
+    fetchData(); // Refresh user data after successful recharge
+  };
 
   return (
     <>
@@ -652,7 +758,6 @@ const AdminUser = () => {
         <title>Admin Dashboard</title>
       </Head>
       <div className="h-full p-6">
-        {/* Header Section */}
         <div className="flex flex-col sm:flex-row items-center justify-between mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-0">
             User Management
@@ -678,15 +783,8 @@ const AdminUser = () => {
           </div>
         </div>
 
-        {/* Date Range Section */}
         <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
-
-
-          
           <div className="p-6 max-w-xl w-full mx-auto">
-
-
-
             <div className="space-y-1">
               <label
                 htmlFor="serviceType"
@@ -695,7 +793,6 @@ const AdminUser = () => {
                 Service Type
               </label>
 
-              {/* Selected Items Tags */}
               <div className="flex flex-wrap gap-2 min-h-8 mb-2">
                 {selectedServiceType.map(type => (
                   <span
@@ -707,14 +804,12 @@ const AdminUser = () => {
                       onClick={() => removeServiceType(type)}
                       className="ml-1 hover:text-blue-800"
                     >
-
                       <div className=" bg-blue-100 p-1 text-blue-800 rounded">X</div>
                     </button>
                   </span>
                 ))}
               </div>
 
-              {/* Custom Dropdown */}
               <div className="relative">
                 <button
                   type="button"
@@ -750,16 +845,9 @@ const AdminUser = () => {
                 )}
               </div>
             </div>
-
-            {/* Debug View */}
-            <div className="mt-4 p-4 bg-gray-50 rounded-md">
-              <p className="text-sm text-gray-500">Selected Services:</p>
-              <p className="text-sm">{selectedServiceType.join(', ') || 'None'}</p>
-            </div>
           </div>
         </div>
 
-        {/* User Cards Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 ">
           {users.map((user) => (
             <div
@@ -768,14 +856,11 @@ const AdminUser = () => {
 
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-
                   <div className="bg-blue-100 p-2 rounded-full">
-
                     <FiUser className="text-blue-600 text-xl" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-sm">{user.username}</h3>
-
                     <p className="text-sm text-gray-500">{user.serviceType}</p>
                   </div>
                 </div>
@@ -802,7 +887,6 @@ const AdminUser = () => {
                 </div>
               </div>
 
-
               <div className="flex justify-between items-center pt-4 border-t">
                 <div className="flex gap-2 ">
                   <button
@@ -824,7 +908,7 @@ const AdminUser = () => {
                     }}
                     title="View Details"
                   >
-                    <FaEye  size={12}/>
+                    <FaEye size={12}/>
                   </button>
 
                   <button
@@ -838,6 +922,16 @@ const AdminUser = () => {
                     <DollarSign size={12} />
                   </button>
 
+                  <button
+                    className="p-1 bg-green-50 text-green-600 rounded-lg hover:bg-green-100 transition-colors"
+                    onClick={() => {
+                      fetchUserDetails(user._id);
+                      setIsRechargeModalOpen(true);
+                    }}
+                    title="Recharge Talk Time"
+                  >
+                    <NotebookPenIcon size={12} />
+                  </button>
 
                   {user.serviceType === "Agent" && (
                     <button
@@ -848,11 +942,9 @@ const AdminUser = () => {
                       }}
                       title="Recording Show"
                     >
-                      <IoMdRecording  size={12}/>
+                      <IoMdRecording size={12}/>
                     </button>
                   )}
-
-
 
                   <button
                     className="p-1 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-colors"
@@ -871,26 +963,16 @@ const AdminUser = () => {
                       fetchUserDetails(user._id);
                       setIsNotificationModalOpen(true);
                     }}
-                    title="View Analytics"
+                    title="Send Notification"
                   >
                     <Bell size={12} />
                   </button>
-
-                  {/* <button
-                    className="p-1 bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-colors"
-                    onClick={() => deleteUser(user._id)}
-                    title="Delete User"
-                  >
-                    <FaTrash size={12} />
-                  </button> */}
                 </div>
-
               </div>
             </div>
           ))}
         </div>
 
-        {/* Pagination */}
         <div className="flex justify-between items-center mt-8">
           <div className="flex items-center gap-2">
             <button
@@ -911,10 +993,8 @@ const AdminUser = () => {
               Next
             </button>
           </div>
-
         </div>
 
-        {/* User Modal */}
         <UserModal
           isOpen={isModalOpen}
           onClose={() => {
@@ -928,17 +1008,6 @@ const AdminUser = () => {
           setEditedUser={setEditedUser}
           onUpdate={updateUser}
           setIsEditing={setIsEditing}
-        />
-
-
-        {/* Add this just before the closing div */}
-        <SubscriptionModal
-          isOpen={isSubscriptionModalOpen}
-          onClose={() => {
-            setIsSubscriptionModalOpen(false);
-            setSelectedUser(null);
-          }}
-          user={selectedUser}
         />
 
         <SubscriptionModal
@@ -975,6 +1044,16 @@ const AdminUser = () => {
             setSelectedUser(null);
           }}
           userId={selectedUser?._id}
+        />
+
+        <TalkTimeRechargeModal
+          isOpen={isRechargeModalOpen}
+          onClose={() => {
+            setIsRechargeModalOpen(false);
+            setSelectedUser(null);
+          }}
+          userId={selectedUser?._id}
+          onRechargeSuccess={handleRechargeSuccess}
         />
       </div>
     </>
